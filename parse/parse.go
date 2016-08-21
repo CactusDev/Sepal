@@ -10,7 +10,7 @@ type message struct {
     To string `json:"to"`
 }
 
-type hoiPacket struct {
+type supPacket struct {
     authKey string `json:"authkey"`
 }
 
