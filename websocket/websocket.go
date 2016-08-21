@@ -4,31 +4,13 @@ import (
     "github.com/gorilla/websocket"
     "net/http"
     log "github.com/Sirupsen/logrus"
-    "encoding/json"
+    parser ".././parse"
 )
-
-type message struct {
-    AlertType string `json:"type"`
-    Message string `json:"message"`
-    To string `json:"to"`
-}
 
 var upgrader = websocket.Upgrader {
     ReadBufferSize: 1024,
     WriteBufferSize: 1024,
 }
-
-func parse(data []byte) (*message, error) {
-    var msg = new (message)
-
-    err := json.Unmarshal(data, &msg)
-    if err != nil {
-        log.Error("Unable to parse data: ", data)
-        log.Error(err)
-    }
-    return msg, err
-}
-
 
 func Listen(port string) {
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -46,12 +28,12 @@ func Listen(port string) {
                 return
             }
 
-            msg, err := parse([]byte(message))
+            msg, err := parser.Parse([]byte(message))
             if err != nil {
                 log.Error(err)
                 return
             }
-            log.Info(msg)
+            log.Info("Got: ", msg)
         }
     })
 
