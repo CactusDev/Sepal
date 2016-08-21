@@ -21,6 +21,7 @@ func isJson(data []byte) bool {
 
 func Parse(data []byte) (*message, error) {
     var err error
+
     if isJson(data) {
         var msg = new(message)
 

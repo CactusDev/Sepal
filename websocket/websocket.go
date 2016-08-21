@@ -33,7 +33,10 @@ func Listen(port string) {
                 log.Error(err)
                 return
             }
-            log.Info("Got: ", msg)
+
+            if msg != nil {
+                log.Info("Got: ", msg)
+            }
         }
     })
 
