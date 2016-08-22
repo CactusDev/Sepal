@@ -17,7 +17,7 @@ func sendMessage(connection *websocket.Conn, message string) {
 	connection.WriteMessage(1, []byte(message))
 }
 
-func Listen(port string) {
+func Listen() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		connection, err := upgrader.Upgrade(w, r, nil)
 
@@ -65,5 +65,5 @@ func Listen(port string) {
 		}
 	})
 
-	http.ListenAndServe(port, nil)
+	http.ListenAndServe(":3000", nil)
 }

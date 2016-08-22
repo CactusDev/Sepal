@@ -22,3 +22,7 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+server.key
+server.pem
+server.crt
