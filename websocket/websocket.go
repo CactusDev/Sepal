@@ -44,6 +44,10 @@ func Listen(port string) {
 
             if msg != nil {
                 log.Info("Got: ", msg)
+                log.Info("Got: ", msg.Type)
+                log.Info("Got: ", msg.Method)
+                log.Info("Got: ", msg.Method["salad"])
+                log.Info("Got: ", msg.Method["potato"])
             }
         }
     })
