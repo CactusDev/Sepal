@@ -55,14 +55,16 @@ func Listen() {
 				}
 
 				if msg != nil {
-					if msg.Data["event"] != "" {
-						packet = map[string]string{
-							"type": "info",
-							"info": "Subscribed to event " + msg.Data["event"],
-						}
-						packetMsg, _ = json.Marshal(packet)
-						sendMessage(connection, string(packetMsg))
-					}
+                    if msg.Type == "auth" {
+                        // TODO: Auth stuff here
+                    } else if msg.Type == "subscribe" {
+                        // TODO: Sub to events
+                    } else if msg.Type == "unsubscribe" {
+                        // TODO: Unsub from events
+                    } else {
+						// TODO: Send an error packet
+                    }
+
 					log.Info("Got: ", msg)
 				}
 			}()
