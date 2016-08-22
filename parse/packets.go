@@ -12,5 +12,6 @@ type authPacket struct {
 
 type methodPacket struct {
     Type string `json:"type"`
-    Method map[string]string `json:"method"`
+    Method string `json:"method"`
+    Data map[string]string `json:"data"`
 }

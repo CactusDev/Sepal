@@ -3,6 +3,7 @@ package websocket
 import (
     "github.com/gorilla/websocket"
     "net/http"
+    "encoding/json"
     log "github.com/Sirupsen/logrus"
     parser ".././parse"
 )
@@ -19,7 +20,13 @@ func sendMessage(connection *websocket.Conn, message string) {
 func Listen(port string) {
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
         connection, err := upgrader.Upgrade(w, r, nil)
-        sendMessage(connection, "Hello")
+
+        packet := map[string]string{
+            "type": "sup",
+        }
+        packetMsg, _ := json.Marshal(packet)
+
+        sendMessage(connection, string(packetMsg))
 
         if err != nil {
             log.Error(err)
@@ -43,6 +50,14 @@ func Listen(port string) {
             }
 
             if msg != nil {
+                if msg.Data["event"] != "" {
+                    packet = map[string]string{
+                        "type": "info",
+                        "info": "Subscribed to event " + msg.Data["event"],
+                    }
+                    packetMsg, _ = json.Marshal(packet)
+                    sendMessage(connection, string(packetMsg))
+                }
                 log.Info("Got: ", msg)
             }
         }
