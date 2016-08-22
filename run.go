@@ -1,16 +1,13 @@
 package main
 
 import (
-    "github.com/Sirupsen/logrus"
-    "./websocket"
+	"./util"
+	"./websocket"
 )
-var log = logrus.New()
+
+var log = util.InitLogger(true)
 
 func main() {
-    log.Formatter = new(logrus.TextFormatter)
-    log.Level = logrus.DebugLevel
-    log.Info("Logger initialized.")
-
-    log.Info("Attempting to bind socket.")
-    websocket.Listen()
+	log.Info("Attempting to bind socket.")
+	websocket.Listen()
 }

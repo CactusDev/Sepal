@@ -2,16 +2,20 @@ package websocket
 
 import (
 	parser ".././parse"
+	".././util"
 	"encoding/json"
-	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/websocket"
 	"net/http"
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
+var (
+	upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+
+	log = util.GetLogger()
+)
 
 func sendMessage(connection *websocket.Conn, message string) {
 	connection.WriteMessage(1, []byte(message))
