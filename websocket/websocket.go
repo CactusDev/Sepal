@@ -50,15 +50,17 @@ func Listen(port string) {
             }
 
             if msg != nil {
-                if msg.Data["event"] != "" {
-                    packet = map[string]string{
-                        "type": "info",
-                        "info": "Subscribed to event " + msg.Data["event"],
+                go func() {
+                    if msg.Data["event"] != "" {
+                        packet = map[string]string{
+                            "type": "info",
+                            "info": "Subscribed to event " + msg.Data["event"],
+                        }
+                        packetMsg, _ = json.Marshal(packet)
+                        sendMessage(connection, string(packetMsg))
                     }
-                    packetMsg, _ = json.Marshal(packet)
-                    sendMessage(connection, string(packetMsg))
-                }
-                log.Info("Got: ", msg)
+                    log.Info("Got: ", msg)
+                }()
             }
         }
     })
