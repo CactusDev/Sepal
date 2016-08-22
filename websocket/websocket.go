@@ -3,6 +3,7 @@ package websocket
 import (
 	parser ".././parse"
 	".././util"
+	".././user"
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	"net/http"
@@ -56,7 +57,8 @@ func Listen() {
 
 				if msg != nil {
                     if msg.Type == "auth" {
-                        // TODO: Auth stuff here
+                        // TODO: Auth checking
+						user.AddUser(msg.Data["channel"], msg.Data["events"])
                     } else if msg.Type == "subscribe" {
                         // TODO: Sub to events
                     } else if msg.Type == "unsubscribe" {
