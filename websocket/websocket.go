@@ -42,9 +42,7 @@ func Listen() {
 
 		for {
 			messageType, message, err := connection.ReadMessage()
-			// if messageType == -1 {
-			// 	return
-			// }
+
 			log.Info(messageType)
 			if err != nil {
 				log.Error(err)
@@ -62,8 +60,6 @@ func Listen() {
 					user.RemoveUser("potato")
 					if msg.Type == "auth" {
 						// TODO: Auth checking
-						events := []string{msg.Data["events"]}
-						user.AddUser(msg.Data["channel"], events)
 					} else if msg.Type == "subscribe" {
 						// TODO: Sub to events
 					} else if msg.Type == "unsubscribe" {
