@@ -1,6 +1,6 @@
 package user
 
-import ".././util"
+import "github.com/cactusbot/sepal/util"
 
 type user struct {
 	Events []string
@@ -42,7 +42,7 @@ func Subscribe(channel string, events []string) {
 func Unsubscribe(channel string, events []string) {
 	go func() {
 		// TODO: this stuff down there v
-		for _, _ = range events {
+		for _ = range events {
 			// delete(users[channel].Events, event)
 		}
 	}()

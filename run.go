@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./util"
-	"./websocket"
+	"github.com/cactusbot/sepal/util"
+	"github.com/cactusbot/sepal/websocket"
 )
 
 var log = util.InitLogger(true)

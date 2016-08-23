@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	parser ".././parse"
-	".././user"
-	".././util"
+	parser "github.com/cactusbot/sepal/parse"
+	"github.com/cactusbot/sepal/user"
+	"github.com/cactusbot/sepal/util"
 	"github.com/gorilla/websocket"
 )
 
