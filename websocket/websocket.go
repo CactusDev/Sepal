@@ -1,12 +1,13 @@
 package websocket
 
 import (
-	parser ".././parse"
-	".././util"
-	".././user"
 	"encoding/json"
-	"github.com/gorilla/websocket"
 	"net/http"
+
+	parser ".././parse"
+	".././user"
+	".././util"
+	"github.com/gorilla/websocket"
 )
 
 var (
@@ -22,6 +23,7 @@ func sendMessage(connection *websocket.Conn, message string) {
 	connection.WriteMessage(1, []byte(message))
 }
 
+// Listen listen for websocket connections
 func Listen() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		connection, err := upgrader.Upgrade(w, r, nil)
@@ -57,17 +59,18 @@ func Listen() {
 				}
 
 				if msg != nil {
-                    if msg.Type == "auth" {
-                        // TODO: Auth checking
+					user.RemoveUser("potato")
+					if msg.Type == "auth" {
+						// TODO: Auth checking
 						events := []string{msg.Data["events"]}
 						user.AddUser(msg.Data["channel"], events)
-                    } else if msg.Type == "subscribe" {
-                        // TODO: Sub to events
-                    } else if msg.Type == "unsubscribe" {
-                        // TODO: Unsub from events
-                    } else {
+					} else if msg.Type == "subscribe" {
+						// TODO: Sub to events
+					} else if msg.Type == "unsubscribe" {
+						// TODO: Unsub from events
+					} else {
 						// TODO: Send an error packet
-                    }
+					}
 
 					log.Info("Got: ", msg)
 				}
