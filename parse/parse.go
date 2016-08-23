@@ -2,6 +2,8 @@ package parsing
 
 import (
 	"encoding/json"
+
+	"github.com/cactusbot/sepal/util"
 )
 
 // Packet a general packet for everything
@@ -11,17 +13,12 @@ type Packet struct {
 	Data   map[string]string `json:"data"`
 }
 
-func isJSON(data []byte) bool {
-	var message map[string]interface{}
-	return json.Unmarshal(data, &message) == nil
-}
-
 // Parse parse the given data into a packet, and return that and an error
 func Parse(data []byte) (*Packet, error) {
 	var err error
 
-	if isJSON(data) {
-		var message = new(packet)
+	if util.IsJSON(data) {
+		var message = new(Packet)
 		err = json.Unmarshal(data, &message)
 
 		return message, err
