@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"golang.org/x/net/http2"
+
 	parser "github.com/cactusbot/sepal/parse"
-	"github.com/cactusbot/sepal/user"
 	"github.com/cactusbot/sepal/util"
 	"github.com/gorilla/websocket"
 )
@@ -25,6 +26,12 @@ func sendMessage(connection *websocket.Conn, message string) {
 
 // Listen listen for websocket connections
 func Listen() {
+	var server http.Server
+	http2.VerboseLogs = true
+	server.Addr = ":3000"
+
+	http2.ConfigureServer(&server, nil)
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		connection, err := upgrader.Upgrade(w, r, nil)
 
@@ -43,7 +50,10 @@ func Listen() {
 		for {
 			messageType, message, err := connection.ReadMessage()
 
-			log.Info(messageType)
+			if messageType != 1 {
+				return
+			}
+
 			if err != nil {
 				log.Error(err)
 				return
@@ -57,7 +67,6 @@ func Listen() {
 				}
 
 				if msg != nil {
-					user.RemoveUser("potato")
 					if msg.Type == "auth" {
 						// TODO: Auth checking
 					} else if msg.Type == "subscribe" {
@@ -74,5 +83,6 @@ func Listen() {
 		}
 	})
 
-	http.ListenAndServe(":3000", nil)
+	log.Fatal(server.ListenAndServe())
+	// log.Fatal(server.ListenAndServeTLS("cert.pem", "key.pem"))
 }
