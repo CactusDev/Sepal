@@ -8,9 +8,9 @@ import (
 
 // Packet a general packet for everything
 type Packet struct {
-	Type   string            `json:"type"`
-	Method string            `json:"method"`
-	Data   map[string]string `json:"data"`
+	Type   string `json:"type"`
+	Method string `json:"method"`
+	Data   string `json:"data"`
 }
 
 // Parse parse the given data into a packet, and return that and an error

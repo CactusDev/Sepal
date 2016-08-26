@@ -6,6 +6,8 @@ import (
 
 	"golang.org/x/net/http2"
 
+	"github.com/cactusbot/sepal/client"
+	"github.com/cactusbot/sepal/database"
 	parser "github.com/cactusbot/sepal/parse"
 	"github.com/cactusbot/sepal/util"
 	"github.com/gorilla/websocket"
@@ -22,6 +24,19 @@ var (
 
 func sendMessage(connection *websocket.Conn, message string) {
 	connection.WriteMessage(1, []byte(message))
+}
+
+// Dispatch - Dispatch a message
+func Dispatch() {
+	for {
+		select {
+		case command := <-database.CommandChannel:
+			log.Info(command)
+			client.BroadcastToScope("test", command)
+		case quote := <-database.QuoteChannel:
+			log.Info(quote)
+		}
+	}
 }
 
 // Listen listen for websocket connections
@@ -67,17 +82,22 @@ func Listen() {
 				}
 
 				if msg != nil {
+					var currentClient client.Client
+
+					log.Info("Got: ", msg)
 					if msg.Type == "auth" {
 						// TODO: Auth checking
+						events := []string{"test"}
+						currentClient = client.Client{events, "", connection}
+						client.AddClient(currentClient)
 					} else if msg.Type == "subscribe" {
-						// TODO: Sub to events
+						currentClient.Subscribe(msg.Data)
 					} else if msg.Type == "unsubscribe" {
-						// TODO: Unsub from events
+						currentClient.Unsubscribe(msg.Data)
 					} else {
 						// TODO: Send an error packet
 					}
 
-					log.Info("Got: ", msg)
 				}
 			}()
 		}

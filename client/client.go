@@ -1,28 +1,30 @@
-package user
+package client
 
-import "github.com/cactusbot/sepal/util"
+import (
+	"github.com/cactusbot/sepal/util"
+	"github.com/gorilla/websocket"
+)
 
 // Client - Client connected to the websocket
 type Client struct {
-	Events []string
-	IP     string
+	Events     []string
+	IP         string
+	Connection *websocket.Conn
 }
 
 // Clients - Array of clients connected to the websocket
 var Clients = map[string]Client{}
 
-// AddClient Add a client
-func AddClient(channel string, events []string, ip string) Client {
-	client := Client{events, ip}
-	Clients[channel] = client
-	return client
+// AddClient - Add a client
+func AddClient(client Client) {
+	Clients[client.IP] = client
 }
 
-// RemoveClient Remove a client
-func (c *Client) RemoveClient(channel string) {
-	_, exists := Clients[channel]
+// Remove - Remove the client
+func (c *Client) Remove() {
+	_, exists := Clients[c.IP]
 	if exists {
-		delete(Clients, channel)
+		delete(Clients, c.IP)
 	} else {
 		defer func() {
 			if r := recover(); r != nil {
@@ -34,21 +36,29 @@ func (c *Client) RemoveClient(channel string) {
 	}
 }
 
-// Subscribe Subscribe to events
-func (c *Client) Subscribe(channel string, events []string) {
-	go func() {
-		for _, event := range events {
-			_ = append(Clients[channel].Events, event)
-		}
-	}()
+// Subscribe - Subscribe to events
+func (c *Client) Subscribe(event string) {
+	c.Events = append(c.Events, event)
+	// go func() {
+	// 	for _, event := range events {
+	// 		_ = append(c.Events, event)
+	// 	}
+	// }()
 }
 
-// Unsubscribe Unsubscribe to events
-func (c Client) Unsubscribe(channel string, events []string) {
-	go func() {
-		// TODO: this stuff down there v
-		for _ = range events {
-			// delete(Clients[channel].Events, event)
-		}
-	}()
+// Unsubscribe - Unsubscribe from events
+func (c *Client) Unsubscribe(event string) {
+	yes, index := util.StringInSlice(event, c.Events)
+	if yes {
+		util.GetLogger().Info(c.Events[index])
+		c.Events[index] = ""
+	}
+	// go func() {
+	// 	for _, event := range events {
+	// 		yes, index := util.StringInSlice(event, c.Events)
+	// 		if yes && index != -1 {
+	// 			c.Events[index] = ""
+	// 		}
+	// 	}
+	// }()
 }
