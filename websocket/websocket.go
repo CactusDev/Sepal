@@ -85,7 +85,6 @@ func Listen() {
 		ip := connection.LocalAddr().String()
 
 		if err != nil {
-			log.Error(err)
 			return
 		}
 
@@ -114,20 +113,16 @@ func Listen() {
 			if messageType == -1 {
 				log.Info("Client with IP ", ip, " disconnected.")
 				client.Clients[ip] = client.Client{}
-			} else {
-				return
 			}
 
 			if err != nil {
 				log.Error(err)
-				return
 			}
 
 			go func() {
 				msg, err := parser.Parse([]byte(message))
 				if err != nil {
 					log.Error(err)
-					return
 				}
 
 				if msg != nil {
@@ -148,7 +143,13 @@ func Listen() {
 							currentClient.Scopes, " of the channel: ",
 							currentClient.Channel)
 					} else {
-						// TODO: Send an error packet
+						packet = map[string]string{
+							"type":  "error",
+							"error": "Invalid packet type: " + msg.Type,
+						}
+						packetMsg, _ := json.Marshal(packet)
+
+						sendMessage(connection, string(packetMsg))
 					}
 
 				}
