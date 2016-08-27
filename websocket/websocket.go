@@ -3,7 +3,6 @@ package websocket
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"golang.org/x/net/http2"
 
@@ -106,7 +105,7 @@ func Listen() {
 					log.Debug("Got a packet: ", msg)
 					if msg.Type == "auth" {
 						currentClient = client.Client{
-							Scopes:     strings.Split(msg.Scopes, ","),
+							Scopes:     msg.Scopes,
 							IP:         connection.LocalAddr().String(),
 							Connection: connection,
 							Channel:    msg.Channel,
