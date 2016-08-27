@@ -7,8 +7,9 @@ import (
 
 // Client - Client connected to the websocket
 type Client struct {
-	Events     []string
+	Scopes     []string
 	IP         string
+	Channel    string
 	Connection *websocket.Conn
 }
 
@@ -16,15 +17,15 @@ type Client struct {
 var Clients = map[string]Client{}
 
 // AddClient - Add a client
-func AddClient(client Client) {
-	Clients[client.IP] = client
+func AddClient(client *Client) {
+	Clients[client.IP] = *client
 }
 
 // Remove - Remove the client
-func (c *Client) Remove() {
-	_, exists := Clients[c.IP]
+func (c *Client) Remove(client *Client) {
+	_, exists := Clients[client.IP]
 	if exists {
-		delete(Clients, c.IP)
+		delete(Clients, client.IP)
 	} else {
 		defer func() {
 			if r := recover(); r != nil {
@@ -34,31 +35,4 @@ func (c *Client) Remove() {
 		}()
 		panic("Tried to delete a user that doesn't exist!")
 	}
-}
-
-// Subscribe - Subscribe to events
-func (c *Client) Subscribe(event string) {
-	c.Events = append(c.Events, event)
-	// go func() {
-	// 	for _, event := range events {
-	// 		_ = append(c.Events, event)
-	// 	}
-	// }()
-}
-
-// Unsubscribe - Unsubscribe from events
-func (c *Client) Unsubscribe(event string) {
-	yes, index := util.StringInSlice(event, c.Events)
-	if yes {
-		util.GetLogger().Info(c.Events[index])
-		c.Events[index] = ""
-	}
-	// go func() {
-	// 	for _, event := range events {
-	// 		yes, index := util.StringInSlice(event, c.Events)
-	// 		if yes && index != -1 {
-	// 			c.Events[index] = ""
-	// 		}
-	// 	}
-	// }()
 }

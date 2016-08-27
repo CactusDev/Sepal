@@ -3,6 +3,7 @@ package websocket
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"golang.org/x/net/http2"
 
@@ -22,6 +23,13 @@ var (
 	log = util.GetLogger()
 )
 
+type commandPacket struct {
+	Command  string
+	Response string
+	ID       string
+	Channel  string
+}
+
 func sendMessage(connection *websocket.Conn, message string) {
 	connection.WriteMessage(1, []byte(message))
 }
@@ -31,8 +39,17 @@ func Dispatch() {
 	for {
 		select {
 		case command := <-database.CommandChannel:
-			log.Info(command)
-			client.BroadcastToScope("test", command)
+			var packet commandPacket
+
+			packet = commandPacket{
+				Command:  command.NewVal.Command,
+				Response: command.NewVal.Response,
+				ID:       command.NewVal.ID,
+				Channel:  command.NewVal.Channel,
+			}
+
+			data, _ := json.Marshal(packet)
+			client.BroadcastToScope("command:create", string(data))
 		case quote := <-database.QuoteChannel:
 			log.Info(quote)
 		}
@@ -50,8 +67,10 @@ func Listen() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		connection, err := upgrader.Upgrade(w, r, nil)
 
+		log.Info("Got connection from IP: ", connection.LocalAddr().String())
+
 		packet := map[string]string{
-			"type": "sup",
+			"type": "aloha",
 		}
 		packetMsg, _ := json.Marshal(packet)
 
@@ -84,16 +103,21 @@ func Listen() {
 				if msg != nil {
 					var currentClient client.Client
 
-					log.Info("Got: ", msg)
+					log.Debug("Got a packet: ", msg)
 					if msg.Type == "auth" {
 						// TODO: Auth checking
-						events := []string{"test"}
-						currentClient = client.Client{events, "", connection}
-						client.AddClient(currentClient)
-					} else if msg.Type == "subscribe" {
-						currentClient.Subscribe(msg.Data)
-					} else if msg.Type == "unsubscribe" {
-						currentClient.Unsubscribe(msg.Data)
+						currentClient = client.Client{
+							Scopes:     strings.Split(msg.Scopes, ","),
+							IP:         connection.LocalAddr().String(),
+							Connection: connection,
+							Channel:    msg.Channel,
+						}
+						client.AddClient(&currentClient)
+
+						log.Info("Client with the ip of: ",
+							currentClient.IP, " subscribed to scopes: ",
+							currentClient.Scopes, " of the channel: ",
+							currentClient.Channel)
 					} else {
 						// TODO: Send an error packet
 					}
