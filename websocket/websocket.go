@@ -105,7 +105,6 @@ func Listen() {
 
 					log.Debug("Got a packet: ", msg)
 					if msg.Type == "auth" {
-						// TODO: Auth checking
 						currentClient = client.Client{
 							Scopes:     strings.Split(msg.Scopes, ","),
 							IP:         connection.LocalAddr().String(),
