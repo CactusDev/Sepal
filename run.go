@@ -25,6 +25,6 @@ func main() {
 	go ratelimit.Reset()
 
 	log.Info("Attempting to create a socket...")
-	websocket.Listen()
+	websocket.Listen(":3000")
 
 }

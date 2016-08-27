@@ -21,6 +21,8 @@ var (
 	}
 
 	log = util.GetLogger()
+
+	close = make(chan bool)
 )
 
 type commandPacket struct {
@@ -73,10 +75,10 @@ func Dispatch() {
 }
 
 // Listen listen for websocket connections
-func Listen() {
+func Listen(port string) {
 	var server http.Server
 	http2.VerboseLogs = true
-	server.Addr = ":3000"
+	server.Addr = port
 
 	http2.ConfigureServer(&server, nil)
 
@@ -108,6 +110,11 @@ func Listen() {
 		sendMessage(connection, string(packetMsg))
 
 		for {
+			select {
+			case quit := <-close:
+				break
+			}
+
 			_, message, err := connection.ReadMessage()
 
 			if err != nil {
