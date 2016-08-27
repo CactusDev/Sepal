@@ -7,6 +7,7 @@ import (
 	"golang.org/x/net/http2"
 
 	"github.com/cactusbot/sepal/client"
+	"github.com/cactusbot/sepal/client/ratelimit"
 	"github.com/cactusbot/sepal/database"
 	parser "github.com/cactusbot/sepal/parse"
 	"github.com/cactusbot/sepal/util"
@@ -81,8 +82,24 @@ func Listen() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		connection, err := upgrader.Upgrade(w, r, nil)
+		ip := connection.LocalAddr().String()
 
-		log.Info("Got connection from IP: ", connection.LocalAddr().String())
+		if err != nil {
+			log.Error(err)
+			return
+		}
+
+		if !ratelimit.CanConnect(ip) {
+			go func(conn *websocket.Conn) {
+				err = conn.Close()
+				if err != nil {
+					log.Error(err)
+				}
+			}(connection)
+		}
+
+		log.Info("Connection from IP: ", ip)
+		log.Debug("Remaining Limit: ", ratelimit.GetLimit(ip))
 
 		packet := map[string]string{
 			"type": "aloha",
@@ -91,15 +108,13 @@ func Listen() {
 
 		sendMessage(connection, string(packetMsg))
 
-		if err != nil {
-			log.Error(err)
-			return
-		}
-
 		for {
 			messageType, message, err := connection.ReadMessage()
 
-			if messageType != 1 {
+			if messageType == -1 {
+				log.Info("Client with IP ", ip, " disconnected.")
+				client.Clients[ip] = client.Client{}
+			} else {
 				return
 			}
 
@@ -122,7 +137,7 @@ func Listen() {
 					if msg.Type == "auth" {
 						currentClient = client.Client{
 							Scopes:     msg.Scopes,
-							IP:         connection.LocalAddr().String(),
+							IP:         ip,
 							Connection: connection,
 							Channel:    msg.Channel,
 						}
