@@ -5,8 +5,8 @@ import (
 	rethink "gopkg.in/dancannon/gorethink.v2"
 )
 
-// Result - Result from a rethink call
-type Result struct {
+// CommandResult - Result from a rethink call on the commands table
+type CommandResult struct {
 	ID       string `gorethink:"id"`
 	Command  string `gorethink:"command"`
 	Response string `gorethink:"response"`
@@ -15,14 +15,21 @@ type Result struct {
 
 // Command - Command
 type Command struct {
-	NewVal *Result `gorethink:"new_val"`
-	OldVal *Result `gorethink:"old_val"`
+	NewVal *CommandResult `gorethink:"new_val"`
+	OldVal *CommandResult `gorethink:"old_val"`
+}
+
+// QuoteResult - Result from a rethink call on the quotes table
+type QuoteResult struct {
+	ID      int    `gorethink:"quoteId"`
+	Quote   string `gorethink:"quote"`
+	Channel string `gorethink:"channelName"`
 }
 
 // Quote - Quote
 type Quote struct {
-	ID       int
-	Response string
+	NewVal *QuoteResult `gorethink:"new_val"`
+	OldVal *QuoteResult `gorethink:"old_val"`
 }
 
 // CommandChannel - Channel for sending command changes
@@ -51,7 +58,7 @@ func WatchCommands(session *rethink.Session) {
 	table, err := rethink.Table("commands").Changes().Run(session)
 
 	if err != nil {
-		return
+		util.GetLogger().Error(err)
 	}
 
 	var command Command
@@ -65,7 +72,7 @@ func WatchQuotes(session *rethink.Session) {
 	table, err := rethink.Table("quotes").Changes().Run(session)
 
 	if err != nil {
-		return
+		util.GetLogger().Error(err)
 	}
 
 	var quote Quote

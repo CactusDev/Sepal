@@ -23,10 +23,16 @@ var (
 )
 
 type commandPacket struct {
-	Command  string
-	Response string
-	ID       string
-	Channel  string
+	Command  string `json:"command"`
+	Response string `json:"response"`
+	ID       string `json:"id"`
+	Channel  string `json:"channel"`
+}
+
+type quotePacket struct {
+	ID       int    `json:"id"`
+	Response string `json:"response"`
+	Channel  string `json:"channel"`
 }
 
 func sendMessage(connection *websocket.Conn, message string) {
@@ -47,10 +53,20 @@ func Dispatch() {
 				Channel:  command.NewVal.Channel,
 			}
 
+			log.Info("Command: ", packet)
 			data, _ := json.Marshal(packet)
 			client.BroadcastToScope("command:create", packet.Channel, string(data))
 		case quote := <-database.QuoteChannel:
-			log.Info(quote)
+			var packet quotePacket
+
+			packet = quotePacket{
+				ID:       quote.NewVal.ID,
+				Response: quote.NewVal.Quote,
+				Channel:  quote.NewVal.Channel,
+			}
+
+			data, _ := json.Marshal(packet)
+			client.BroadcastToScope("quote:create", packet.Channel, string(data))
 		}
 	}
 }

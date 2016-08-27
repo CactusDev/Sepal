@@ -8,7 +8,9 @@ func BroadcastToScope(scope string, channel string, data string) {
 		inScope, _ := util.StringInSlice(scope, client.Scopes)
 
 		if inScope {
+			util.GetLogger().Info("1")
 			if client.Channel == channel {
+				util.GetLogger().Info("2")
 				client.Connection.WriteMessage(1, []byte(data))
 			}
 		}
