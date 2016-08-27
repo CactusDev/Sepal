@@ -108,9 +108,9 @@ func Listen() {
 		sendMessage(connection, string(packetMsg))
 
 		for {
-			messageType, message, err := connection.ReadMessage()
+			_, message, err := connection.ReadMessage()
 
-			if messageType == -1 {
+			if err != nil {
 				log.Info("Client with IP ", ip, " disconnected.")
 				client.Clients[ip] = client.Client{}
 			}

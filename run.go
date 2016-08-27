@@ -1,15 +1,20 @@
 package main
 
 import (
+	"flag"
+
 	"github.com/cactusbot/sepal/client/ratelimit"
 	"github.com/cactusbot/sepal/database"
 	"github.com/cactusbot/sepal/util"
 	"github.com/cactusbot/sepal/websocket"
 )
 
-var log = util.InitLogger(true)
-
 func main() {
+	debug := flag.Bool("debug", false, "Debug mode")
+	flag.Parse()
+
+	log := util.InitLogger(*debug)
+
 	log.Info("Starting dispathcer...")
 	go websocket.Dispatch()
 
