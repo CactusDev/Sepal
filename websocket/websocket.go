@@ -22,10 +22,11 @@ var (
 
 	log = util.GetLogger()
 
-	close = make(chan bool)
+	Close = make(chan bool)
 )
 
 type commandPacket struct {
+	Scope    string `json:"scope"`
 	Command  string `json:"command"`
 	Response string `json:"response"`
 	ID       string `json:"id"`
@@ -33,6 +34,7 @@ type commandPacket struct {
 }
 
 type quotePacket struct {
+	Scope    string `json:"scope"`
 	ID       int    `json:"id"`
 	Response string `json:"response"`
 	Channel  string `json:"channel"`
@@ -49,27 +51,53 @@ func Dispatch() {
 		case command := <-database.CommandChannel:
 			var packet commandPacket
 
-			packet = commandPacket{
-				Command:  command.NewVal.Command,
-				Response: command.NewVal.Response,
-				ID:       command.NewVal.ID,
-				Channel:  command.NewVal.Channel,
-			}
+			if command.NewVal == nil && command.OldVal != nil {
+				packet = commandPacket{
+					Scope:    "command:remove",
+					Command:  command.OldVal.Command,
+					Response: command.OldVal.Response,
+					ID:       command.OldVal.ID,
+					Channel:  command.OldVal.Channel,
+				}
 
-			log.Info("Command: ", packet)
-			data, _ := json.Marshal(packet)
-			client.BroadcastToScope("command:create", packet.Channel, string(data))
+				data, _ := json.Marshal(packet)
+				client.BroadcastToScope("command:remove", packet.Channel, string(data))
+			} else {
+				packet = commandPacket{
+					Scope:    "command:create",
+					Command:  command.NewVal.Command,
+					Response: command.NewVal.Response,
+					ID:       command.NewVal.ID,
+					Channel:  command.NewVal.Channel,
+				}
+
+				data, _ := json.Marshal(packet)
+				client.BroadcastToScope("command:create", packet.Channel, string(data))
+			}
 		case quote := <-database.QuoteChannel:
 			var packet quotePacket
 
-			packet = quotePacket{
-				ID:       quote.NewVal.ID,
-				Response: quote.NewVal.Quote,
-				Channel:  quote.NewVal.Channel,
-			}
+			if quote.OldVal != nil && quote.NewVal == nil {
+				packet = quotePacket{
+					Scope:    "quote:remove",
+					ID:       quote.OldVal.ID,
+					Response: quote.OldVal.Quote,
+					Channel:  quote.OldVal.Channel,
+				}
 
-			data, _ := json.Marshal(packet)
-			client.BroadcastToScope("quote:create", packet.Channel, string(data))
+				data, _ := json.Marshal(packet)
+				client.BroadcastToScope("quote:remove", packet.Channel, string(data))
+			} else {
+				packet = quotePacket{
+					Scope:    "quote:create",
+					ID:       quote.NewVal.ID,
+					Response: quote.NewVal.Quote,
+					Channel:  quote.NewVal.Channel,
+				}
+
+				data, _ := json.Marshal(packet)
+				client.BroadcastToScope("quote:create", packet.Channel, string(data))
+			}
 		}
 	}
 }
@@ -110,11 +138,6 @@ func Listen(port string) {
 		sendMessage(connection, string(packetMsg))
 
 		for {
-			select {
-			case quit := <-close:
-				break
-			}
-
 			_, message, err := connection.ReadMessage()
 
 			if err != nil {
