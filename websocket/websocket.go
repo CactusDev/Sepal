@@ -48,7 +48,7 @@ func Dispatch() {
 			}
 
 			data, _ := json.Marshal(packet)
-			client.BroadcastToScope("command:create", string(data))
+			client.BroadcastToScope("command:create", packet.Channel, string(data))
 		case quote := <-database.QuoteChannel:
 			log.Info(quote)
 		}
