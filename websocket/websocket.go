@@ -86,7 +86,7 @@ func Dispatch() {
 				}
 
 				data, _ := json.Marshal(packet)
-				client.BroadcastToScope("quote:remove", packet.Channel, string(data))
+				client.BroadcastToScope(packet.Scope, packet.Channel, string(data))
 			} else {
 				packet = quotePacket{
 					Scope:    "quote:create",
@@ -96,7 +96,7 @@ func Dispatch() {
 				}
 
 				data, _ := json.Marshal(packet)
-				client.BroadcastToScope("quote:create", packet.Channel, string(data))
+				client.BroadcastToScope(packet.Scope, packet.Channel, string(data))
 			}
 		}
 	}
