@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"os"
 
 	"github.com/cactusbot/sepal/client/ratelimit"
 	"github.com/cactusbot/sepal/database"
@@ -25,6 +26,6 @@ func main() {
 	go ratelimit.Reset()
 
 	log.Info("Attempting to create a socket...")
-	websocket.Listen(":3000")
+	websocket.Listen(os.Getenv("PORT"))
 
 }

@@ -21,8 +21,6 @@ var (
 	}
 
 	log = util.GetLogger()
-
-	Close = make(chan bool)
 )
 
 type commandPacket struct {
@@ -143,10 +141,7 @@ func Listen(port string) {
 			if err != nil {
 				log.Info("Client with IP ", ip, " disconnected.")
 				client.Clients[ip] = client.Client{}
-			}
-
-			if err != nil {
-				log.Error(err)
+				break
 			}
 
 			go func() {
