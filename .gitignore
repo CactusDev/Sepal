@@ -26,3 +26,6 @@ _testmain.go
 # Test stuff
 
 client.py
+
+# Gin stuff
+gin-bin

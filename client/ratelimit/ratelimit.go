@@ -9,7 +9,7 @@ import (
 // String: IP Int: requests left until limited
 var clients = make(map[string]int)
 
-const maxLimit = 1
+const maxLimit = 5
 
 // CanConnect - Check if a client can connect
 func CanConnect(ip string) bool {
