@@ -110,11 +110,11 @@ func Listen(port string) {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		connection, err := upgrader.Upgrade(w, r, nil)
-		ip := connection.LocalAddr().String()
 
 		if err != nil {
 			return
 		}
+		ip := connection.LocalAddr().String()
 
 		if !ratelimit.CanConnect(ip) {
 			go func(conn *websocket.Conn) {
