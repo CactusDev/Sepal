@@ -9,7 +9,7 @@ Sepal is a piece of software who's purpose is to broadcast events.
  - Golang: [Papyrus](https://github.com/cactusbot/papyrus)
 
 ### Protocol
-Sepal uses a format simalar to JSON-API. We plan to make it the same format later on. To connect, create a normal Websocket connection to `sepal.cactusbot.fish`. No custom headers need to be passed.
+Sepal uses a format simalar to JSON-API. We plan to make it the same format later on. To connect, create a normal Websocket connection to `sepal.cactusbot.potato`. No custom headers need to be passed.
 
 ### Packets
 There's four packet types. These are: `auth`, `list`, `aloha`, and `event`. They're sent over the socket as normal JSON encoded strings.
