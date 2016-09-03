@@ -38,6 +38,12 @@ type quotePacket struct {
 	Channel  string `json:"channel"`
 }
 
+type listPacket struct {
+	Scope   string      `json:"scope"`
+	Channel string      `json:"channel"`
+	List    interface{} `json:"list"`
+}
+
 func sendMessage(connection *websocket.Conn, message string) {
 	connection.WriteMessage(1, []byte(message))
 }
@@ -162,6 +168,39 @@ func Listen(port string) {
 							Channel:    msg.Channel,
 						}
 						client.AddClient(&currentClient)
+
+						packet := map[string]interface{}{
+							"type": "list",
+						}
+						go func(currentClient *client.Client) {
+							for scope := range currentClient.Scopes {
+								if currentClient.Scopes[scope] == "command:list" {
+									data, err := database.GetAllCommands(currentClient.Channel)
+									if err != nil {
+										log.Error(err)
+										return
+									}
+
+									p := listPacket{"command:list", currentClient.Channel, data}
+									packet[currentClient.Scopes[scope]] = p
+								} else if currentClient.Scopes[scope] == "quote:list" {
+									data, err := database.GetAllQuotes(currentClient.Channel)
+									if err != nil {
+										log.Error(err)
+										return
+									}
+
+									p := listPacket{"quote:list", currentClient.Channel, data}
+									packet[currentClient.Scopes[scope]] = p
+								}
+							}
+							marshalledPacket, err := json.Marshal(packet)
+							if err != nil {
+								log.Error(err)
+							}
+							sendMessage(currentClient.Connection, string(marshalledPacket))
+							log.Info(string(marshalledPacket))
+						}(&currentClient)
 
 						log.Info("Client with the ip of: ",
 							currentClient.IP, " subscribed to scopes: ",
