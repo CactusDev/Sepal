@@ -3,6 +3,7 @@ package websocket
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"golang.org/x/net/http2"
 
@@ -24,6 +25,7 @@ var (
 )
 
 type commandPacket struct {
+	Type     string `json:"type"`
 	Scope    string `json:"scope"`
 	Command  string `json:"command"`
 	Response string `json:"response"`
@@ -32,6 +34,7 @@ type commandPacket struct {
 }
 
 type quotePacket struct {
+	Type     string `json:"type"`
 	Scope    string `json:"scope"`
 	ID       int    `json:"id"`
 	Response string `json:"response"`
@@ -39,7 +42,7 @@ type quotePacket struct {
 }
 
 type listPacket struct {
-	Scope   string      `json:"scope"`
+	Type    string      `json:"type"`
 	Channel string      `json:"channel"`
 	List    interface{} `json:"list"`
 }
@@ -57,6 +60,7 @@ func Dispatch() {
 
 			if command.NewVal == nil && command.OldVal != nil {
 				packet = commandPacket{
+					Type:     "event",
 					Scope:    "command:remove",
 					Command:  command.OldVal.Command,
 					Response: command.OldVal.Response,
@@ -68,6 +72,7 @@ func Dispatch() {
 				client.BroadcastToScope("command:remove", packet.Channel, string(data))
 			} else {
 				packet = commandPacket{
+					Type:     "event",
 					Scope:    "command:create",
 					Command:  command.NewVal.Command,
 					Response: command.NewVal.Response,
@@ -83,6 +88,7 @@ func Dispatch() {
 
 			if quote.OldVal != nil && quote.NewVal == nil {
 				packet = quotePacket{
+					Type:     "event",
 					Scope:    "quote:remove",
 					ID:       quote.OldVal.ID,
 					Response: quote.OldVal.Quote,
@@ -93,6 +99,7 @@ func Dispatch() {
 				client.BroadcastToScope(packet.Scope, packet.Channel, string(data))
 			} else {
 				packet = quotePacket{
+					Type:     "event",
 					Scope:    "quote:create",
 					ID:       quote.NewVal.ID,
 					Response: quote.NewVal.Quote,
@@ -161,8 +168,14 @@ func Listen(port string) {
 
 					log.Debug("Got a packet: ", msg)
 					if msg.Type == "auth" {
+
+						scopes := []string{}
+						for _, scope := range msg.Scopes {
+							scopes = append(scopes, strings.ToLower(scope))
+						}
+
 						currentClient = client.Client{
-							Scopes:     msg.Scopes,
+							Scopes:     scopes,
 							IP:         ip,
 							Connection: connection,
 							Channel:    msg.Channel,
@@ -181,16 +194,25 @@ func Listen(port string) {
 										return
 									}
 
-									p := listPacket{"command:list", currentClient.Channel, data}
+									p := listPacket{
+										Type:    "command:list",
+										Channel: currentClient.Channel,
+										List:    data,
+									}
 									packet[currentClient.Scopes[scope]] = p
 								} else if currentClient.Scopes[scope] == "quote:list" {
 									data, err := database.GetAllQuotes(currentClient.Channel)
+									log.Info(data)
 									if err != nil {
 										log.Error(err)
 										return
 									}
 
-									p := listPacket{"quote:list", currentClient.Channel, data}
+									p := listPacket{
+										Type:    "quote:list",
+										Channel: currentClient.Channel,
+										List:    data,
+									}
 									packet[currentClient.Scopes[scope]] = p
 								}
 							}

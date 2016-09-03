@@ -2,6 +2,7 @@ package database
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/cactusbot/sepal/util"
 	rethink "gopkg.in/dancannon/gorethink.v2"
@@ -107,7 +108,7 @@ func GetAllQuotes(channel string) (interface{}, error) {
 
 	var quote *QuoteResult
 	for quotes.Next(&quote) {
-		if quote.Channel == channel {
+		if strings.EqualFold(quote.Channel, channel) {
 			allQuotes[strconv.Itoa(quote.ID)] = *quote
 		}
 	}
@@ -136,7 +137,7 @@ func GetAllCommands(channel string) (interface{}, error) {
 
 	var command *CommandResult
 	for commands.Next(&command) {
-		if command.Channel == channel {
+		if strings.EqualFold(command.Channel, channel) {
 			allCommands[command.Command] = *command
 		}
 	}

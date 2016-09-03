@@ -27,5 +27,4 @@ func main() {
 
 	log.Info("Attempting to create a socket...")
 	websocket.Listen(os.Getenv("PORT"))
-
 }
