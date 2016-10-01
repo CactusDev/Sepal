@@ -24,27 +24,26 @@ var (
 	log = util.GetLogger()
 )
 
+type dataPacket struct {
+	Type    string `json:"type"`
+	Scope   string `json:"scope"`
+	Channel string `json:"channel"`
+	Data    interface{}
+}
+
 type commandPacket struct {
-	Type     string `json:"type"`
-	Scope    string `json:"scope"`
 	Command  string `json:"command"`
 	Response string `json:"response"`
 	ID       string `json:"id"`
-	Channel  string `json:"channel"`
 }
 
 type quotePacket struct {
-	Type     string `json:"type"`
-	Scope    string `json:"scope"`
 	ID       int    `json:"id"`
 	Response string `json:"response"`
-	Channel  string `json:"channel"`
 }
 
 type listPacket struct {
-	Type    string      `json:"type"`
-	Channel string      `json:"channel"`
-	List    interface{} `json:"list"`
+	List interface{} `json:"list"`
 }
 
 func sendMessage(connection *websocket.Conn, message string) {
@@ -60,54 +59,67 @@ func Dispatch() {
 
 			if command.NewVal == nil && command.OldVal != nil {
 				packet = commandPacket{
-					Type:     "event",
-					Scope:    "command:remove",
 					Command:  command.OldVal.Command,
 					Response: command.OldVal.Response,
 					ID:       command.OldVal.ID,
-					Channel:  command.OldVal.Channel,
+				}
+				data := dataPacket{
+					Type:    "event",
+					Scope:   "command:remove",
+					Channel: command.OldVal.Channel,
+					Data:    packet,
 				}
 
-				data, _ := json.Marshal(packet)
-				client.BroadcastToScope("command:remove", packet.Channel, string(data))
+				marshalled, _ := json.Marshal(data)
+				client.BroadcastToScope(data.Scope, data.Channel, string(marshalled))
 			} else {
 				packet = commandPacket{
-					Type:     "event",
-					Scope:    "command:create",
 					Command:  command.NewVal.Command,
 					Response: command.NewVal.Response,
 					ID:       command.NewVal.ID,
-					Channel:  command.NewVal.Channel,
+				}
+				data := dataPacket{
+					Type:    "event",
+					Scope:   "command:create",
+					Channel: command.NewVal.Channel,
+					Data:    packet,
 				}
 
-				data, _ := json.Marshal(packet)
-				client.BroadcastToScope("command:create", packet.Channel, string(data))
+				marshalled, _ := json.Marshal(packet)
+				client.BroadcastToScope(data.Scope, data.Channel, string(marshalled))
 			}
 		case quote := <-database.QuoteChannel:
 			var packet quotePacket
 
 			if quote.OldVal != nil && quote.NewVal == nil {
 				packet = quotePacket{
-					Type:     "event",
-					Scope:    "quote:remove",
 					ID:       quote.OldVal.ID,
 					Response: quote.OldVal.Quote,
-					Channel:  quote.OldVal.Channel,
 				}
 
-				data, _ := json.Marshal(packet)
-				client.BroadcastToScope(packet.Scope, packet.Channel, string(data))
+				data := dataPacket{
+					Type:    "event",
+					Scope:   "quote:remove",
+					Channel: quote.OldVal.Channel,
+					Data:    packet,
+				}
+
+				marshalled, _ := json.Marshal(packet)
+				client.BroadcastToScope(data.Scope, data.Channel, string(marshalled))
 			} else {
 				packet = quotePacket{
-					Type:     "event",
-					Scope:    "quote:create",
 					ID:       quote.NewVal.ID,
 					Response: quote.NewVal.Quote,
-					Channel:  quote.NewVal.Channel,
+				}
+				data := dataPacket{
+					Type:    "event",
+					Scope:   "quote:create",
+					Channel: quote.NewVal.Channel,
+					Data:    packet,
 				}
 
-				data, _ := json.Marshal(packet)
-				client.BroadcastToScope(packet.Scope, packet.Channel, string(data))
+				marshalled, _ := json.Marshal(packet)
+				client.BroadcastToScope(data.Scope, data.Channel, string(marshalled))
 			}
 		}
 	}
