@@ -3,7 +3,7 @@ package ratelimit
 import (
 	"time"
 
-	"github.com/cactusbot/sepal/util"
+	"github.com/cactusdev/sepal/util"
 )
 
 // String: IP Int: requests left until limited

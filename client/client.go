@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/cactusbot/sepal/util"
+	"github.com/cactusdev/sepal/util"
 	"github.com/gorilla/websocket"
 )
 

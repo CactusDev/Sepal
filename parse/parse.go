@@ -3,7 +3,7 @@ package parsing
 import (
 	"encoding/json"
 
-	"github.com/cactusbot/sepal/util"
+	"github.com/cactusdev/sepal/util"
 )
 
 // Packet a general packet for everything
