@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cactusbot/sepal/util"
+	"github.com/cactusdev/sepal/util"
 	rethink "gopkg.in/dancannon/gorethink.v2"
 )
 

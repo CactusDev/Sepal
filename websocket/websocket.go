@@ -7,11 +7,11 @@ import (
 
 	"golang.org/x/net/http2"
 
-	"github.com/cactusbot/sepal/client"
-	"github.com/cactusbot/sepal/client/ratelimit"
-	"github.com/cactusbot/sepal/database"
-	parser "github.com/cactusbot/sepal/parse"
-	"github.com/cactusbot/sepal/util"
+	"github.com/cactusdev/sepal/client"
+	"github.com/cactusdev/sepal/client/ratelimit"
+	"github.com/cactusdev/sepal/database"
+	parser "github.com/cactusdev/sepal/parse"
+	"github.com/cactusdev/sepal/util"
 	"github.com/gorilla/websocket"
 )
 

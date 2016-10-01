@@ -3,7 +3,7 @@ package client
 import (
 	"strings"
 
-	"github.com/cactusbot/sepal/util"
+	"github.com/cactusdev/sepal/util"
 )
 
 // BroadcastToScope - Broadcast data to clients in a scope.
