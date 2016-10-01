@@ -16,6 +16,18 @@ type CommandResult struct {
 	Channel  string `gorethink:"channelName"`
 }
 
+// FriendResult friend
+type FriendResult struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+}
+
+// Friend friend
+type Friend struct {
+	NewVal *FriendResult `gorethink:"new_val"`
+	OldVal *FriendResult `gorethink:"old_val"`
+}
+
 // Command - Command
 type Command struct {
 	NewVal *CommandResult `gorethink:"new_val"`
@@ -41,6 +53,9 @@ var CommandChannel = make(chan Command)
 // QuoteChannel - Channel for sending quote changes
 var QuoteChannel = make(chan Quote)
 
+// FriendChannel channel for sending friend changes
+var FriendChannel = make(chan Friend)
+
 // Connect - Connect to the database.
 func Connect() {
 	session, err := rethink.Connect(rethink.ConnectOpts{
@@ -53,12 +68,12 @@ func Connect() {
 		util.GetLogger().Fatal("Unable to connect to database.")
 	}
 
-	go WatchCommands(session)
-	WatchQuotes(session)
+	go watchCommands(session)
+	go watchQuotes(session)
+	watchFriends(session)
 }
 
-// WatchCommands - Watch the commands table, and dispatch changes.
-func WatchCommands(session *rethink.Session) {
+func watchCommands(session *rethink.Session) {
 	commands, err := rethink.Table("commands").Changes().Run(session)
 	defer commands.Close()
 
@@ -72,8 +87,7 @@ func WatchCommands(session *rethink.Session) {
 	}
 }
 
-// WatchQuotes - Watch the quotes table, and dispatch changes.
-func WatchQuotes(session *rethink.Session) {
+func watchQuotes(session *rethink.Session) {
 	quotes, err := rethink.Table("quotes").Changes().Run(session)
 	defer quotes.Close()
 
@@ -84,6 +98,20 @@ func WatchQuotes(session *rethink.Session) {
 	var quote *Quote
 	for quotes.Next(&quote) {
 		QuoteChannel <- *quote
+	}
+}
+
+func watchFriends(session *rethink.Session) {
+	friends, err := rethink.Table("friends").Changes().Run(session)
+	defer friends.Close()
+
+	if err != nil {
+		util.GetLogger().Error(err)
+	}
+
+	var friend *Friend
+	for friends.Next(&friend) {
+		FriendChannel <- *friend
 	}
 }
 

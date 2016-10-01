@@ -42,6 +42,10 @@ type quotePacket struct {
 	Response string `json:"response"`
 }
 
+type friendPacket struct {
+	Username string `json:"username"`
+}
+
 type listPacket struct {
 	List interface{} `json:"list"`
 }
@@ -116,6 +120,36 @@ func Dispatch() {
 					Scope:   "quote:create",
 					Channel: quote.NewVal.Channel,
 					Data:    packet,
+				}
+
+				marshalled, _ := json.Marshal(packet)
+				client.BroadcastToScope(data.Scope, data.Channel, string(marshalled))
+			}
+
+		case friend := <-database.FriendChannel:
+			var packet friendPacket
+
+			if friend.OldVal != nil && friend.NewVal == nil {
+				packet = friendPacket{
+					Username: friend.OldVal.Username,
+				}
+
+				data := dataPacket{
+					Type:  "event",
+					Scope: "friend:remove",
+					Data:  packet,
+				}
+
+				marshalled, _ := json.Marshal(packet)
+				client.BroadcastToScope(data.Scope, data.Channel, string(marshalled))
+			} else {
+				packet = friendPacket{
+					Username: packet.Username,
+				}
+				data := dataPacket{
+					Type:  "event",
+					Scope: "friend:create",
+					Data:  packet,
 				}
 
 				marshalled, _ := json.Marshal(packet)
