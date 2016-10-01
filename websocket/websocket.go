@@ -3,14 +3,15 @@ package websocket
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"golang.org/x/net/http2"
 
-	"github.com/cactusbot/sepal/client"
-	"github.com/cactusbot/sepal/client/ratelimit"
-	"github.com/cactusbot/sepal/database"
-	parser "github.com/cactusbot/sepal/parse"
-	"github.com/cactusbot/sepal/util"
+	"github.com/cactusdev/sepal/client"
+	"github.com/cactusdev/sepal/client/ratelimit"
+	"github.com/cactusdev/sepal/database"
+	parser "github.com/cactusdev/sepal/parse"
+	"github.com/cactusdev/sepal/util"
 	"github.com/gorilla/websocket"
 )
 
@@ -23,19 +24,30 @@ var (
 	log = util.GetLogger()
 )
 
+type dataPacket struct {
+	Type    string `json:"type"`
+	Scope   string `json:"scope"`
+	Channel string `json:"channel"`
+	Data    interface{}
+}
+
 type commandPacket struct {
-	Scope    string `json:"scope"`
 	Command  string `json:"command"`
 	Response string `json:"response"`
 	ID       string `json:"id"`
-	Channel  string `json:"channel"`
 }
 
 type quotePacket struct {
-	Scope    string `json:"scope"`
 	ID       int    `json:"id"`
 	Response string `json:"response"`
-	Channel  string `json:"channel"`
+}
+
+type friendPacket struct {
+	Username string `json:"username"`
+}
+
+type listPacket struct {
+	List interface{} `json:"list"`
 }
 
 func sendMessage(connection *websocket.Conn, message string) {
@@ -51,50 +63,97 @@ func Dispatch() {
 
 			if command.NewVal == nil && command.OldVal != nil {
 				packet = commandPacket{
-					Scope:    "command:remove",
 					Command:  command.OldVal.Command,
 					Response: command.OldVal.Response,
 					ID:       command.OldVal.ID,
-					Channel:  command.OldVal.Channel,
+				}
+				data := dataPacket{
+					Type:    "event",
+					Scope:   "command:remove",
+					Channel: command.OldVal.Channel,
+					Data:    packet,
 				}
 
-				data, _ := json.Marshal(packet)
-				client.BroadcastToScope("command:remove", packet.Channel, string(data))
+				marshalled, _ := json.Marshal(data)
+				client.BroadcastToScope(data.Scope, data.Channel, string(marshalled))
 			} else {
 				packet = commandPacket{
-					Scope:    "command:create",
 					Command:  command.NewVal.Command,
 					Response: command.NewVal.Response,
 					ID:       command.NewVal.ID,
-					Channel:  command.NewVal.Channel,
+				}
+				data := dataPacket{
+					Type:    "event",
+					Scope:   "command:create",
+					Channel: command.NewVal.Channel,
+					Data:    packet,
 				}
 
-				data, _ := json.Marshal(packet)
-				client.BroadcastToScope("command:create", packet.Channel, string(data))
+				marshalled, _ := json.Marshal(packet)
+				client.BroadcastToScope(data.Scope, data.Channel, string(marshalled))
 			}
 		case quote := <-database.QuoteChannel:
 			var packet quotePacket
 
 			if quote.OldVal != nil && quote.NewVal == nil {
 				packet = quotePacket{
-					Scope:    "quote:remove",
 					ID:       quote.OldVal.ID,
 					Response: quote.OldVal.Quote,
-					Channel:  quote.OldVal.Channel,
 				}
 
-				data, _ := json.Marshal(packet)
-				client.BroadcastToScope(packet.Scope, packet.Channel, string(data))
+				data := dataPacket{
+					Type:    "event",
+					Scope:   "quote:remove",
+					Channel: quote.OldVal.Channel,
+					Data:    packet,
+				}
+
+				marshalled, _ := json.Marshal(packet)
+				client.BroadcastToScope(data.Scope, data.Channel, string(marshalled))
 			} else {
 				packet = quotePacket{
-					Scope:    "quote:create",
 					ID:       quote.NewVal.ID,
 					Response: quote.NewVal.Quote,
-					Channel:  quote.NewVal.Channel,
+				}
+				data := dataPacket{
+					Type:    "event",
+					Scope:   "quote:create",
+					Channel: quote.NewVal.Channel,
+					Data:    packet,
 				}
 
-				data, _ := json.Marshal(packet)
-				client.BroadcastToScope(packet.Scope, packet.Channel, string(data))
+				marshalled, _ := json.Marshal(packet)
+				client.BroadcastToScope(data.Scope, data.Channel, string(marshalled))
+			}
+
+		case friend := <-database.FriendChannel:
+			var packet friendPacket
+
+			if friend.OldVal != nil && friend.NewVal == nil {
+				packet = friendPacket{
+					Username: friend.OldVal.Username,
+				}
+
+				data := dataPacket{
+					Type:  "event",
+					Scope: "friend:remove",
+					Data:  packet,
+				}
+
+				marshalled, _ := json.Marshal(packet)
+				client.BroadcastToScope(data.Scope, data.Channel, string(marshalled))
+			} else {
+				packet = friendPacket{
+					Username: packet.Username,
+				}
+				data := dataPacket{
+					Type:  "event",
+					Scope: "friend:create",
+					Data:  packet,
+				}
+
+				marshalled, _ := json.Marshal(packet)
+				client.BroadcastToScope(data.Scope, data.Channel, string(marshalled))
 			}
 		}
 	}
@@ -155,13 +214,61 @@ func Listen(port string) {
 
 					log.Debug("Got a packet: ", msg)
 					if msg.Type == "auth" {
+
+						scopes := []string{}
+						for _, scope := range msg.Scopes {
+							scopes = append(scopes, strings.ToLower(scope))
+						}
+
 						currentClient = client.Client{
-							Scopes:     msg.Scopes,
+							Scopes:     scopes,
 							IP:         ip,
 							Connection: connection,
 							Channel:    msg.Channel,
 						}
 						client.AddClient(&currentClient)
+
+						packet := map[string]interface{}{
+							"type": "list",
+						}
+						go func(currentClient *client.Client) {
+							for scope := range currentClient.Scopes {
+								if currentClient.Scopes[scope] == "command:list" {
+									data, err := database.GetAllCommands(currentClient.Channel)
+									if err != nil {
+										log.Error(err)
+										return
+									}
+
+									p := listPacket{
+										Type:    "command:list",
+										Channel: currentClient.Channel,
+										List:    data,
+									}
+									packet[currentClient.Scopes[scope]] = p
+								} else if currentClient.Scopes[scope] == "quote:list" {
+									data, err := database.GetAllQuotes(currentClient.Channel)
+									log.Info(data)
+									if err != nil {
+										log.Error(err)
+										return
+									}
+
+									p := listPacket{
+										Type:    "quote:list",
+										Channel: currentClient.Channel,
+										List:    data,
+									}
+									packet[currentClient.Scopes[scope]] = p
+								}
+							}
+							marshalledPacket, err := json.Marshal(packet)
+							if err != nil {
+								log.Error(err)
+							}
+							sendMessage(currentClient.Connection, string(marshalledPacket))
+							log.Info(string(marshalledPacket))
+						}(&currentClient)
 
 						log.Info("Client with the ip of: ",
 							currentClient.IP, " subscribed to scopes: ",

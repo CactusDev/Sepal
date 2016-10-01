@@ -1,7 +1,10 @@
 package database
 
 import (
-	"github.com/cactusbot/sepal/util"
+	"strconv"
+	"strings"
+
+	"github.com/cactusdev/sepal/util"
 	rethink "gopkg.in/dancannon/gorethink.v2"
 )
 
@@ -11,6 +14,18 @@ type CommandResult struct {
 	Command  string `gorethink:"command"`
 	Response string `gorethink:"response"`
 	Channel  string `gorethink:"channelName"`
+}
+
+// FriendResult friend
+type FriendResult struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+}
+
+// Friend friend
+type Friend struct {
+	NewVal *FriendResult `gorethink:"new_val"`
+	OldVal *FriendResult `gorethink:"old_val"`
 }
 
 // Command - Command
@@ -38,45 +53,122 @@ var CommandChannel = make(chan Command)
 // QuoteChannel - Channel for sending quote changes
 var QuoteChannel = make(chan Quote)
 
+// FriendChannel channel for sending friend changes
+var FriendChannel = make(chan Friend)
+
 // Connect - Connect to the database.
 func Connect() {
 	session, err := rethink.Connect(rethink.ConnectOpts{
 		Address:  "localhost:28015",
 		Database: "api",
 	})
+	defer session.Close()
 
 	if err != nil {
 		util.GetLogger().Fatal("Unable to connect to database.")
 	}
 
-	go WatchCommands(session)
-	WatchQuotes(session)
+	go watchCommands(session)
+	go watchQuotes(session)
+	watchFriends(session)
 }
 
-// WatchCommands - Watch the commands table, and dispatch changes.
-func WatchCommands(session *rethink.Session) {
-	table, err := rethink.Table("commands").Changes().Run(session)
+func watchCommands(session *rethink.Session) {
+	commands, err := rethink.Table("commands").Changes().Run(session)
+	defer commands.Close()
 
 	if err != nil {
 		util.GetLogger().Error(err)
 	}
 
-	var command Command
-	for table.Next(&command) {
-		CommandChannel <- command
+	var command *Command
+	for commands.Next(&command) {
+		CommandChannel <- *command
 	}
 }
 
-// WatchQuotes - Watch the quotes table, and dispatch changes.
-func WatchQuotes(session *rethink.Session) {
-	table, err := rethink.Table("quotes").Changes().Run(session)
+func watchQuotes(session *rethink.Session) {
+	quotes, err := rethink.Table("quotes").Changes().Run(session)
+	defer quotes.Close()
 
 	if err != nil {
 		util.GetLogger().Error(err)
 	}
 
-	var quote Quote
-	for table.Next(&quote) {
-		QuoteChannel <- quote
+	var quote *Quote
+	for quotes.Next(&quote) {
+		QuoteChannel <- *quote
 	}
+}
+
+func watchFriends(session *rethink.Session) {
+	friends, err := rethink.Table("friends").Changes().Run(session)
+	defer friends.Close()
+
+	if err != nil {
+		util.GetLogger().Error(err)
+	}
+
+	var friend *Friend
+	for friends.Next(&friend) {
+		FriendChannel <- *friend
+	}
+}
+
+// GetAllQuotes - Get all the quotes, and return them in an interface.
+func GetAllQuotes(channel string) (interface{}, error) {
+	session, err := rethink.Connect(rethink.ConnectOpts{
+		Address:  "localhost:28015",
+		Database: "api",
+	})
+	defer session.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	quotes, err := rethink.Table("quotes").Run(session)
+	defer quotes.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	allQuotes := map[string]interface{}{}
+
+	var quote *QuoteResult
+	for quotes.Next(&quote) {
+		if strings.EqualFold(quote.Channel, channel) {
+			allQuotes[strconv.Itoa(quote.ID)] = *quote
+		}
+	}
+
+	return allQuotes, nil
+}
+
+// GetAllCommands - Get all the quotes, and return them in an interface.
+func GetAllCommands(channel string) (interface{}, error) {
+	session, err := rethink.Connect(rethink.ConnectOpts{
+		Address:  "localhost:28015",
+		Database: "api",
+	})
+	defer session.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	commands, err := rethink.Table("commands").Run(session)
+	defer commands.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	allCommands := map[string]interface{}{}
+
+	var command *CommandResult
+	for commands.Next(&command) {
+		if strings.EqualFold(command.Channel, channel) {
+			allCommands[command.Command] = *command
+		}
+	}
+
+	return allCommands, nil
 }

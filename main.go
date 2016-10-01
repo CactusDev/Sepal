@@ -4,10 +4,10 @@ import (
 	"flag"
 	"os"
 
-	"github.com/cactusbot/sepal/client/ratelimit"
-	"github.com/cactusbot/sepal/database"
-	"github.com/cactusbot/sepal/util"
-	"github.com/cactusbot/sepal/websocket"
+	"github.com/cactusdev/sepal/client/ratelimit"
+	"github.com/cactusdev/sepal/database"
+	"github.com/cactusdev/sepal/util"
+	"github.com/cactusdev/sepal/websocket"
 )
 
 func main() {
@@ -27,5 +27,4 @@ func main() {
 
 	log.Info("Attempting to create a socket...")
 	websocket.Listen(os.Getenv("PORT"))
-
 }
