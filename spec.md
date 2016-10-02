@@ -3,10 +3,6 @@
 ### Introduction
 Sepal is a piece of software who's purpose is to broadcast events.
 
-### First-Party Clients
- - Python: [Cholla](https://github.com/cactusdev/Cholla)
- - Typescript: [Papyrus](https://github.com/cactusdev/Papyrus)
-
 ### Protocol
 Sepal uses a format simalar to JSON-API. We plan to make it the same format later on. To connect, create a normal Websocket connection to `sepal.cactusdev.potato`. No custom headers need to be passed.
 
