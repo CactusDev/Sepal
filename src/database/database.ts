@@ -1,6 +1,6 @@
 "use strict";
 
-import { Config } from "../../config";
+import { Config } from "../config";
 
 const config = new Config().config;
 const thinky = require("thinky")(config);
