@@ -1,0 +1,19 @@
+{
+  "name": "sepal",
+  "version": "1.0.0",
+  "description": "CactusDev's service for sending event packets",
+  "main": "",
+  "scripts": {
+    "lint": "tslint \"src/**/*.ts\"",
+    "build-dev": "tsc --watch",
+    "start": "node dist/index"
+  },
+  "author": "CactusDev",
+  "license": "MIT",
+  "dependencies": {
+    "thinky": "^2.3.7",
+    "tslint": "^3.7.3",
+    "typings": "^1.4.0",
+    "ws": "^1.1.1"
+  }
+}
