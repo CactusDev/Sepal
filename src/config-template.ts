@@ -1,9 +1,11 @@
 
 export class Config {
     config = {
-        "rethink": {
-            "ip": "localhost",
-            "port": "28015"
+        "rethinkdb": {
+            "host": "localhost",
+            "port": "28015",
+            "authKey": "",
+            "db": "api"
         }
     };
 }

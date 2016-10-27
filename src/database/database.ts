@@ -3,7 +3,7 @@
 import { Config } from "../config";
 
 const config = new Config().config;
-const thinky = require("thinky")(config);
+const thinky = require("thinky")(config.rethinkdb);
 const type = thinky.type;
 
 interface Result {
