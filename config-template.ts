@@ -1,4 +1,9 @@
 
 export class Config {
-    // TODO: Make this actually work and do stuff
+    config = {
+        "rethink": {
+            "ip": "localhost",
+            "port": "28015"
+        }
+    };
 }
