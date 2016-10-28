@@ -1,19 +1,17 @@
 # Sepal
 
-This is Sepal. We use this system to send alerts over a websocket to our bot instances, using a plugin, and to send alerts to our Control Panel.
+## What is this?
 
-# Contributing
+This is our system for sending alerts to all our services to provide real-time updates to information displayed.
 
-If you feel so inclined to contribute to Sepal, feel free.
+## Neat. How can I help?
 
-# What's a "Sepal"?
+Well, making a pull req would be AWESOME.
 
-Well, a Sepal is a part of the cactus. And seeing as we're CactusDev, we thought this name fit well.
+## I found a bug! WHAT DO?
 
-# Usage
+Make an issue, that follows our template.
 
-Install deps. Then, install Gin. Proxy FTW
+## Licence
 
-# Running
-
-Run `gin` in the folder. Then, run `PORT=:3001 go run run.go`
+MIT
