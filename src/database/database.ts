@@ -1,6 +1,7 @@
 "use strict";
 
 import { Config } from "../config";
+import { Server } from "../server";
 
 const config = new Config().config;
 const thinky = require("thinky")(config.rethinkdb);
@@ -20,33 +21,35 @@ let Commands = thinky.createModel("commands", {
 });
 
 export class Database {
-    constructor() { }
+    server: any;
 
-    stringify(document: any) {
-        return JSON.stringify(document, null, 4);
+    constructor(server: any) {
+        this.server = server;
     }
 
     watchCommands() {
         Commands.changes().then((feed: any) => {
             feed.each((error: any, document: any) => {
-                console.log(document);
                 if (error) {
                     console.log(error);
                     process.exit(1);
                 }
 
                 if (document.isSaved() === false) {
-                    console.log("This was deleted: ");
-                    console.log(this.stringify(document));
+                    let packet = { "action": "deleted", "type": "command", "data":  document };
+
+                    // FIXME: This is stupid to do
+                    new Server().broadcastToChannel(this.server, document.channel, packet);
                 } else if (document.getOldValue() == null) {
-                    console.log("This was created");
-                    console.log(this.stringify(document));
+                    let packet = { "action": "created", "type": "command", "data":  document };
+
+                    // FIXME: This is stupid to do
+                    new Server().broadcastToChannel(this.server, document.channel, packet);
                 } else {
-                    console.log("This was updated: ");
-                    console.log("Old: ");
-                    console.log(this.stringify(document.getOldValue));
-                    console.log("New: ");
-                    console.log(this.stringify(document));
+                    let packet = { "action": "updated", "type": "command", "data":  document };
+
+                    // FIXME: This is stupid to do
+                    new Server().broadcastToChannel(this.server, document.channel, packet);
                 }
             });
         }).error((error: any) => {
