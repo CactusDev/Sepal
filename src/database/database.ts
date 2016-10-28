@@ -20,6 +20,12 @@ let Commands = thinky.createModel("commands", {
     channel: type.string()
 });
 
+let Quotes = thinky.createModel("quotes", {
+    id: type.string(),
+    quoteID: type.string(),
+    quote: type.string()
+});
+
 export class Database {
     server: any;
 
@@ -47,6 +53,37 @@ export class Database {
                     new Server().broadcastToChannel(this.server, document.channel, packet);
                 } else {
                     let packet = { "action": "updated", "type": "command", "data":  document };
+
+                    // FIXME: This is stupid to do
+                    new Server().broadcastToChannel(this.server, document.channel, packet);
+                }
+            });
+        }).error((error: any) => {
+            console.log(error);
+            process.exit(1);
+        });
+    }
+
+    watchQuotes() {
+        Quotes.changes().then((feed: any) => {
+            feed.each((error: any, document: any) => {
+                if (error) {
+                    console.log(error);
+                    process.exit(1);
+                }
+
+                if (document.isSaved() === false) {
+                    let packet = { "action": "deleted", "type": "quote", "data":  document };
+
+                    // FIXME: This is stupid to do
+                    new Server().broadcastToChannel(this.server, document.channel, packet);
+                } else if (document.getOldValue() == null) {
+                    let packet = { "action": "created", "type": "quote", "data":  document };
+
+                    // FIXME: This is stupid to do
+                    new Server().broadcastToChannel(this.server, document.channel, packet);
+                } else {
+                    let packet = { "action": "updated", "type": "quote", "data":  document };
 
                     // FIXME: This is stupid to do
                     new Server().broadcastToChannel(this.server, document.channel, packet);
