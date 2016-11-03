@@ -25,6 +25,11 @@ let Quotes = thinky.createModel("quotes", {
     quote: type.string()
 });
 
+let Users = thinky.createModel("users", {
+    id: type.string(),
+    username: type.string()
+})
+
 export class Database {
     server: any;
 
@@ -74,6 +79,14 @@ export class Database {
         }).error((error: any) => {
             console.log(error);
             process.exit(1);
+        });
+    }
+
+    channelExists(channel: string) {
+        Users.filter({ username: channel }).run().then((res: Object) => {
+            console.log(res === []);
+            console.log(res);
+            return res === [];
         });
     }
 }

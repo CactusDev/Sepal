@@ -50,13 +50,18 @@ export class Server {
                     connection.send(JSON.stringify(response.parse()));
                 }
 
-                // TODO: Check if the channel supplied is a valid channel
-                // Needs the api
+                let channelExists = database.channelExists(packet.channel);
+                console.log(channelExists);
 
-                this.clients[connection] = packet.channel;
+                if (!channelExists) {
+                    let response = new ErrorPacket("Channel does not exist.", 1002, null)
+                    connection.send(JSON.stringify(response.parse()));
+                } else {
+                    this.clients[connection] = packet.channel;
 
-                let response = new EventPacket("subscribed", packet.channel, null, null);
-                connection.send(JSON.stringify(response.parse()));
+                    let response = new EventPacket("subscribed", packet.channel, null, null);
+                    connection.send(JSON.stringify(response.parse()));
+                }
             });
         });
     }
