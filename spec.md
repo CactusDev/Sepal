@@ -34,6 +34,8 @@ Event packets are sent by the server when something notable happens.
 
 ### Error codes
 
+ - 999: The packet is invalid or blank
  - 1000: Packet doesn't contain a type
- - 1001: Packet type isn't valid
- - 1002: User is invalid
+ - 1001: Channel was not supplied
+ - 1002: Channel is invalid
+ - 1003: Packet type isn't valid
