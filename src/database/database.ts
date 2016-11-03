@@ -1,7 +1,6 @@
 "use strict";
 
 import { Config } from "../config";
-import { Server } from "../server";
 
 const config = new Config().config;
 const thinky = require("thinky")(config.rethinkdb);
@@ -16,24 +15,20 @@ let Commands = thinky.createModel("commands", {
     id: type.string(),
     commandName: type.string(),
     response: type.string(),
-    calls: type.string(),
+    calls: type.number(),
     channel: type.string()
 });
 
 let Quotes = thinky.createModel("quotes", {
     id: type.string(),
-    quoteID: type.string(),
+    quoteID: type.number(),
     quote: type.string()
 });
-
-let models = [
-    Commands,
-    Quotes
-]
 
 export class Database {
     server: any;
 
+    // TODO: Figure out variable types for all the things
     constructor(server: any) {
         this.server = server;
     }

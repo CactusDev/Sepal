@@ -15,6 +15,8 @@ export class Server {
 
     clients: Object[];
 
+    // TODO: Fix crash with invalid json
+
     constructor(port?: number) {
         this.clients = [{}];
         if (port) {
@@ -31,7 +33,15 @@ export class Server {
 
         server.on("connection", (connection: any) => {
             connection.on("message", (message: string) => {
-                let packet = JSON.parse(message);
+                // HACK
+                let packet = JSON.parse("{}");
+                try {
+                    packet = JSON.parse(message);
+                } catch (e) {
+                    let response = new ErrorPacket("The packet is invalid or blank", 999, null);
+                    connection.send(JSON.stringify(response.parse()));
+                }
+
                 if (!packet.type) {
                     let response = new ErrorPacket("Packet type was not supplied", 1000, null);
                     connection.send(JSON.stringify(response.parse()));
@@ -43,6 +53,7 @@ export class Server {
                 }
 
                 // TODO: Check if the channel supplied is a valid channel
+                // Needs the api
 
                 this.clients[connection] = packet.channel;
             });
@@ -50,7 +61,6 @@ export class Server {
     }
 
      broadcastToChannel(channel: string, action: string, event: string, data: Object) {
-        // this.server.clients.forEach((client: any) => client.send(JSON.stringify(data)));
         this.server.clients.forEach((client: any) => {
             if (channel === this.clients[client]) {
                 let response = new EventPacket(event, channel, action, data);
