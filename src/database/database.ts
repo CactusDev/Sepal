@@ -84,8 +84,6 @@ export class Database {
 
     channelExists(channel: string) {
         Users.filter({ username: channel }).run().then((res: Object) => {
-            console.log(res === []);
-            console.log(res);
             return res === [];
         });
     }
