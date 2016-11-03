@@ -45,6 +45,9 @@ export class Server {
                 } else if (!packet.channel) {
                     let response = new ErrorPacket("Channel was not supplied", 1001, null);
                     connection.send(JSON.stringify(response.parse()));
+                } else if (packet.type !== "subscribe") {
+                    let response = new ErrorPacket("Packet type is invalid", 1003, null);
+                    connection.send(JSON.stringify(response.parse()));
                 }
 
                 // TODO: Check if the channel supplied is a valid channel

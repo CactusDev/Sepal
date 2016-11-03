@@ -38,4 +38,4 @@ Event packets are sent by the server when something notable happens.
  - 1000: Packet doesn't contain a type
  - 1001: Channel was not supplied
  - 1002: Channel is invalid
- - 1003: Packet type isn't valid
+ - 1003: Packet type is invalid
