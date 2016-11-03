@@ -25,7 +25,7 @@ export class Server {
         database.watchCommands();
 
         server.on("connection", (connection: any) => {
-            connection.on("message", (message: any) => {
+            connection.on("message", (message: string) => {
                 let packet = JSON.parse(message);
                 if (!packet.type) {
                     connection.send("a");
