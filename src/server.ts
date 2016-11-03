@@ -15,8 +15,6 @@ export class Server {
 
     clients: Object[];
 
-    // TODO: Fix crash with invalid json
-
     constructor(port?: number) {
         this.clients = [{}];
         if (port) {
@@ -56,6 +54,9 @@ export class Server {
                 // Needs the api
 
                 this.clients[connection] = packet.channel;
+
+                let response = new EventPacket("subscribed", packet.channel, null, null);
+                connection.send(JSON.stringify(response.parse()));
             });
         });
     }
