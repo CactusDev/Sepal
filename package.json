@@ -5,13 +5,17 @@
   "main": "",
   "scripts": {
     "lint": "tslint \"src/**/*.ts\"",
-    "start": "node dist/index"
+    "start": "node dist/index",
+    "build": "tsc src/"
   },
   "author": "CactusDev",
   "license": "MIT",
   "dependencies": {
     "bufferutil": "^1.2.1",
+    "gulp-typescript": "^3.1.2",
+    "merge2": "^1.0.2",
     "thinky": "^2.3.7",
+    "tsc": "^1.20150623.0+f2044a901165a2a97813772353b57dd9ed4796ca",
     "tslint": "^3.7.3",
     "typings": "^1.4.0",
     "utf-8-validate": "^1.2.1",
