@@ -26,6 +26,11 @@ let Quotes = thinky.createModel("quotes", {
     quote: type.string()
 });
 
+let models = [
+    Commands,
+    Quotes
+]
+
 export class Database {
     server: any;
 
@@ -42,17 +47,11 @@ export class Database {
                 }
 
                 if (document.isSaved() === false) {
-                    let packet = { "action": "deleted", "type": "command", "data":  document };
-
-                    this.server.broadcastToChannel(document.channel, packet);
+                    this.server.broadcastToChannel(document.channel, "deleted", "command", document);
                 } else if (document.getOldValue() == null) {
-                    let packet = { "action": "created", "type": "command", "data":  document };
-
-                    this.server.broadcastToChannel(document.channel, packet);
+                    this.server.broadcastToChannel(document.channel, "created", "command", document);
                 } else {
-                    let packet = { "action": "updated", "type": "command", "data":  document };
-
-                    this.server.broadcastToChannel(document.channel, packet);
+                    this.server.broadcastToChannel(document.channel, "updated", "command", document);
                 }
             });
         }).error((error: any) => {
@@ -70,17 +69,11 @@ export class Database {
                 }
 
                 if (document.isSaved() === false) {
-                    let packet = { "action": "deleted", "type": "quote", "data":  document };
-
-                    this.server.broadcastToChannel(document.channel, packet);
+                    this.server.broadcastToChannel(document.channel, "deleted", "quote", document);
                 } else if (document.getOldValue() == null) {
-                    let packet = { "action": "created", "type": "quote", "data":  document };
-
-                    this.server.broadcastToChannel(document.channel, packet);
+                    this.server.broadcastToChannel(document.channel, "created", "quote", document);
                 } else {
-                    let packet = { "action": "updated", "type": "quote", "data":  document };
-
-                    this.server.broadcastToChannel(document.channel, packet);
+                    this.server.broadcastToChannel(document.channel, "updated", "quote", document);
                 }
             });
         }).error((error: any) => {
