@@ -1,5 +1,5 @@
-/// <reference path="../typings/ws/ws.d.ts" />
-/// <reference path="../typings/node/node.d.ts" />
+/// <reference path="../typings/globals/ws/index.d.ts" />
+/// <reference path="../typings/globals/node/index.d.ts" />
 
 import { Database } from "./database/database";
 
@@ -19,7 +19,7 @@ export class Server {
 
     listen() {
         let server = new WebSocketServer({ port: this.port });
-        let database = new Database(server);
+        let database = new Database(this);
         this.server = server;
 
         database.watchCommands();
@@ -35,7 +35,7 @@ export class Server {
     }
 
      // FIXME: This is stupid to do
-     broadcastToChannel(server: any, channel: string, data: Object) {
-        server.clients.forEach((client: any) => client.send(JSON.stringify(data)));
+     broadcastToChannel(channel: string, data: Object) {
+        this.server.clients.forEach((client: any) => client.send(JSON.stringify(data)));
     }
 }
