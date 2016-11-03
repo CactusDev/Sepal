@@ -31,8 +31,7 @@ export class Server {
 
         server.on("connection", (connection: any) => {
             connection.on("message", (message: string) => {
-                // HACK
-                let packet = JSON.parse("{}");
+                let packet: any = {};
                 try {
                     packet = JSON.parse(message);
                 } catch (e) {
@@ -43,9 +42,7 @@ export class Server {
                 if (!packet.type) {
                     let response = new ErrorPacket("Packet type was not supplied", 1000, null);
                     connection.send(JSON.stringify(response.parse()));
-                }
-
-                if (!packet.channel) {
+                } else if (!packet.channel) {
                     let response = new ErrorPacket("Channel was not supplied", 1001, null);
                     connection.send(JSON.stringify(response.parse()));
                 }
