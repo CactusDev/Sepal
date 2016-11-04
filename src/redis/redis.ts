@@ -1,15 +1,10 @@
 const redis = require("redis");
-const client = redis.createClient();
+const config = require("../config");
+const client = redis.createClient(config.redis);
 
 export class Redis {
 
-    host: string;
-    port: number;
-
-    constructor(host: string, port: number) {
-        this.host = host;
-        this.port = port;
-    }
+    constructor() { }
 
     set(key: string, value: string) {
         client.set(key, value);

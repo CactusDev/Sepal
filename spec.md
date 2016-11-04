@@ -33,6 +33,18 @@ Event packets are sent by the server when something notable happens.
 }
 ```
 
+#### Incoming Event Packet
+Incoming event packets are sent by the client (Usually a bot) when a user joins / leaves a channel.
+
+```json
+{
+    "type": "event",
+    "event": "join",
+    "channel": "temmie",
+    "service": "beam"
+}
+```
+
 ### Error codes
 
  - 999: The packet is invalid or blank
@@ -40,3 +52,4 @@ Event packets are sent by the server when something notable happens.
  - 1001: Channel was not supplied
  - 1002: Channel is invalid
  - 1003: Packet type is invalid
+ - 1004: Incoming packet data is invalid.
