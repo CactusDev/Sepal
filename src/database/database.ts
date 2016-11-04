@@ -1,7 +1,6 @@
 "use strict";
 
 import { Config } from "../config";
-import { Server } from "../server";
 
 const config = new Config().config;
 const thinky = require("thinky")(config.rethinkdb);
@@ -16,19 +15,25 @@ let Commands = thinky.createModel("commands", {
     id: type.string(),
     commandName: type.string(),
     response: type.string(),
-    calls: type.string(),
+    calls: type.number(),
     channel: type.string()
 });
 
 let Quotes = thinky.createModel("quotes", {
     id: type.string(),
-    quoteID: type.string(),
+    quoteID: type.number(),
     quote: type.string()
 });
+
+let Users = thinky.createModel("users", {
+    id: type.string(),
+    username: type.string()
+})
 
 export class Database {
     server: any;
 
+    // TODO: Figure out variable types for all the things
     constructor(server: any) {
         this.server = server;
     }
@@ -42,20 +47,11 @@ export class Database {
                 }
 
                 if (document.isSaved() === false) {
-                    let packet = { "action": "deleted", "type": "command", "data":  document };
-
-                    // FIXME: This is stupid to do
-                    new Server().broadcastToChannel(this.server, document.channel, packet);
+                    this.server.broadcastToChannel(document.channel, "deleted", "command", document);
                 } else if (document.getOldValue() == null) {
-                    let packet = { "action": "created", "type": "command", "data":  document };
-
-                    // FIXME: This is stupid to do
-                    new Server().broadcastToChannel(this.server, document.channel, packet);
+                    this.server.broadcastToChannel(document.channel, "created", "command", document);
                 } else {
-                    let packet = { "action": "updated", "type": "command", "data":  document };
-
-                    // FIXME: This is stupid to do
-                    new Server().broadcastToChannel(this.server, document.channel, packet);
+                    this.server.broadcastToChannel(document.channel, "updated", "command", document);
                 }
             });
         }).error((error: any) => {
@@ -73,25 +69,22 @@ export class Database {
                 }
 
                 if (document.isSaved() === false) {
-                    let packet = { "action": "deleted", "type": "quote", "data":  document };
-
-                    // FIXME: This is stupid to do
-                    new Server().broadcastToChannel(this.server, document.channel, packet);
+                    this.server.broadcastToChannel(document.channel, "deleted", "quote", document);
                 } else if (document.getOldValue() == null) {
-                    let packet = { "action": "created", "type": "quote", "data":  document };
-
-                    // FIXME: This is stupid to do
-                    new Server().broadcastToChannel(this.server, document.channel, packet);
+                    this.server.broadcastToChannel(document.channel, "created", "quote", document);
                 } else {
-                    let packet = { "action": "updated", "type": "quote", "data":  document };
-
-                    // FIXME: This is stupid to do
-                    new Server().broadcastToChannel(this.server, document.channel, packet);
+                    this.server.broadcastToChannel(document.channel, "updated", "quote", document);
                 }
             });
         }).error((error: any) => {
             console.log(error);
             process.exit(1);
+        });
+    }
+
+    channelExists(channel: string) {
+        Users.filter({ username: channel }).run().then((res: Object) => {
+            return res === [];
         });
     }
 }
