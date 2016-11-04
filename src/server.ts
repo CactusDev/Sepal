@@ -25,6 +25,7 @@ export class Server {
     listen() {
         let server = new WebSocketServer({ port: this.port });
         let database = new Database(this);
+
         this.server = server;
 
         database.watchCommands();
