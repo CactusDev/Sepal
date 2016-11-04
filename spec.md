@@ -22,6 +22,7 @@ Event packets are sent by the server when something notable happens.
     "event": "command",
     "channel": "temmie",
     "action": "created",
+    "service": "beam",
     "data": {
         "calls": 1,
         "channel": "temmie",

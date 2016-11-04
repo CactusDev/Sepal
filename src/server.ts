@@ -59,17 +59,17 @@ export class Server {
                 } else {
                     this.clients[connection] = packet.channel;
 
-                    let response = new EventPacket("subscribed", packet.channel, null, null);
+                    let response = new EventPacket("subscribed", packet.channel, null, null, null);
                     connection.send(JSON.stringify(response.parse()));
                 }
             });
         });
     }
 
-     broadcastToChannel(channel: string, action: string, event: string, data: Object) {
+     broadcastToChannel(channel: string, action: string, event: string, service: string, data: Object) {
         this.server.clients.forEach((client: any) => {
             if (channel === this.clients[client]) {
-                let response = new EventPacket(event, channel, action, data);
+                let response = new EventPacket(event, channel, action, service, data);
                 client.send(JSON.stringify(response.parse()));
             }
         });

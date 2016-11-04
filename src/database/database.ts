@@ -16,7 +16,8 @@ let Commands = thinky.createModel("commands", {
     commandName: type.string(),
     response: type.string(),
     calls: type.number(),
-    channel: type.string()
+    channel: type.string(),
+    service: type.string()
 });
 
 let Quotes = thinky.createModel("quotes", {
