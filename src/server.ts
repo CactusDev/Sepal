@@ -28,8 +28,12 @@ export class Server {
     listen() {
         let server = new WebSocketServer({ port: this.port });
         let database = new Database(this);
+        let redis = new Redis();
 
         this.server = server;
+
+        redis.set("banana", "potato");
+        console.log(redis.get("banana"));
 
         database.watchCommands();
 

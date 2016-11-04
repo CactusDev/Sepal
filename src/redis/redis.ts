@@ -1,11 +1,11 @@
 const redis = require("redis");
-const config = require("../config");
+import { Config } from "../config";
+
+const config = new Config().config;
+
 const client = redis.createClient(config.redis);
 
 export class Redis {
-
-    constructor() { }
-
     set(key: string, value: string) {
         client.set(key, value);
     }
