@@ -4,7 +4,7 @@ import * as Logger from "../logging/logger";
 interface ActiveUsers {
     [channelName: string]: {
         [userId: string]: number;
-    }[];
+    };
 }
 
 export class Active {
@@ -20,11 +20,17 @@ export class Active {
     }
 
     addUser(uuid: string, channel: string) {
-        this.activeUsers[channel].push({ uuid: 0 });
+        this.activeUsers[channel][uuid] = 0;
+        Logger.debug(`Added ${uuid} to ${channel}`);
     }
 
     deleteUser(uuid: string, channel: string) {
-        // TODO
+        Object.keys(this.activeUsers).forEach(channelName => {
+            if (channelName === channel) {
+                Object.keys(channel).forEach(user => delete this.activeUsers[channel][user]);
+            }
+        });
+        Logger.debug(`Removed ${uuid} from ${channel}`);
     }
 
     watch() {
