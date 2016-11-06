@@ -25,9 +25,12 @@ The `users` dictionary is formatted like: `username: activeTime`
 {
     "type": "join",
     "username": "innectic",
-    "service": "beam"
+    "service": "beam",
+    "time": "1478461782422"
 }
 ```
+
+`time` is expected to be in unix time.
 
 ### Algorithm Design
 
