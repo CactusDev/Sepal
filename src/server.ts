@@ -4,6 +4,8 @@
 import { Database } from "./database/database";
 import { Redis } from "./redis/redis";
 
+import * as Logger from "./logging/logger";
+
 import { ErrorPacket } from "./packet/error";
 import { EventPacket } from "./packet/event";
 
@@ -30,7 +32,8 @@ export class Server {
         let database = new Database(this);
         let redis = new Redis();
 
-        redis.connect();
+        redis.connect()
+            .then(() => Logger.info("Connected to Redis."));
 
         this.server = server;
 
