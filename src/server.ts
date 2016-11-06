@@ -32,6 +32,8 @@ export class Server {
 
         redis.connect();
 
+        redis.set("potato", "salad");
+
         this.server = server;
 
         database.watchCommands();
@@ -44,7 +46,7 @@ export class Server {
                     let packet = new IncomingEventPacket(JSON.parse(message));
                     let error = packet.parse();
                     if (error != null) {
-                        connection.send(new ErrorPacket(error, 10004, null).parse());
+                        connection.send(new ErrorPacket(error, 1004, null).parse());
                     }
                 } else {
                     try {
