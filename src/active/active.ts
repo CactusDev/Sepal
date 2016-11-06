@@ -27,7 +27,11 @@ export class Active {
     deleteUser(uuid: string, channel: string) {
         Object.keys(this.activeUsers).forEach(channelName => {
             if (channelName === channel) {
-                Object.keys(channel).forEach(user => delete this.activeUsers[channel][user]);
+                Object.keys(channel).forEach(user => {
+                    if (user === uuid) {
+                        delete this.activeUsers[channel][user];
+                    }
+                });
             }
         });
         Logger.debug(`Removed ${uuid} from ${channel}`);
