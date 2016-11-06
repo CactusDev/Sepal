@@ -30,6 +30,8 @@ export class Server {
         let database = new Database(this);
         let redis = new Redis();
 
+        redis.connect();
+
         this.server = server;
 
         database.watchCommands();
