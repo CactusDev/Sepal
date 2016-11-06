@@ -6,7 +6,7 @@ export function info(message: string) {
 }
 
 export function warning(message: string) {
-        console.log(colors.yello("WARN: ") + colors.white(message));
+        console.log(colors.yellow("WARN: ") + colors.white(message));
 }
 
 export function error(message: string) {
