@@ -58,7 +58,7 @@ export class Redis {
         });
     }
 
-    set(key: string, value: string, expire?: number): Promise<any> {
+    set(key: string, value: string, expire?: number): Promise<string> {
         if (expire != null) {
             return this.client.setAsync(key, expire, value);
         }
