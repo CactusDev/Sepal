@@ -25,7 +25,7 @@ export class Redis {
             let client = redis.createClient(config.redis);
 
             client.on("reconnection", () => {
-                Logger.debug("Connection to redis was lost. Attempting to reconnect...");
+                Logger.debug("Connection to Redis was lost. Attempting to reconnect...");
             });
 
             client.on("error", (error: string) => {
@@ -34,12 +34,10 @@ export class Redis {
 
             client.on("ready", () => {
                 clearTimeout(connectionTimeout);
-
-                Logger.info("Connected to redis.");
-
                 this.client = client;
+
+                resolve();
             });
-            resolve();
         });
     }
 
@@ -51,7 +49,7 @@ export class Redis {
 
             this.client.on("end", () => {
                 clearTimeout(disconnectionTimeout);
-                Logger.info("Disconnected from redis.");
+                Logger.info("Disconnected from Redis.");
                 resolve();
             });
             this.client.quit();
@@ -60,7 +58,7 @@ export class Redis {
 
     set(key: string, value: string, expire?: number): Promise<string> {
         if (expire != null) {
-            return this.client.setAsync(key, expire, value);
+            return this.client.setexAsync(key, expire, value);
         }
         return this.client.setAsync(key, value);
     }
