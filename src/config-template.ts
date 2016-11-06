@@ -1,6 +1,7 @@
 
 export class Config {
     config = {
+        "env": "dev",
         "rethinkdb": {
             "host": "localhost",
             "port": "28015",
@@ -12,6 +13,10 @@ export class Config {
             "port": "6379",
             "password": "",
             "db": ""
+        },
+        "sentry": {
+            "enabled": false,
+            "url": ""
         }
     };
 }

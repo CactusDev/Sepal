@@ -66,7 +66,6 @@ export class Server {
                     }
 
                     let channelExists = database.channelExists(packet.channel);
-                    redis.set("salad", "potato");
 
                     if (!channelExists) {
                         let response = new ErrorPacket("Channel does not exist.", 1002, null)
