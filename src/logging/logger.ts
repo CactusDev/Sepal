@@ -1,20 +1,14 @@
 
 const colors = require("colors/safe");
 
-export class Logger {
-    constructor() {
+export function info(message: string) {
+    console.log(colors.green("INFO: ") + colors.white(message));
+}
 
-    }
-
-    info(message: string) {
-        console.log(colors.green("INFO: ") + colors.white(message));
-    }
-
-    warning(message: string) {
+export function warning(message: string) {
         console.log(colors.yello("WARN: ") + colors.white(message));
-    }
+}
 
-    error(message: string) {
+export function error(message: string) {
         console.log(colors.red("ERROR: ") + colors.white(message));
-    }
 }
