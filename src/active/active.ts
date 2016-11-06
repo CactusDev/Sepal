@@ -9,8 +9,15 @@ interface ActiveUsers {
 
 export class Active {
     activeUsers: ActiveUsers;
+    activeTime: number;
 
-    constructor() { }
+    constructor(activeTime?: number) {
+        if (activeTime != null) {
+            this.activeTime = 4;
+        } else {
+            this.activeTime = activeTime;
+        }
+    }
 
     addUser(uuid: string, channel: string) {
         this.activeUsers[channel].push({ uuid: 0 });
@@ -18,5 +25,9 @@ export class Active {
 
     deleteUser(uuid: string, channel: string) {
         // TODO
+    }
+
+    watch() {
+        let time = new Date().getTime();
     }
 }
