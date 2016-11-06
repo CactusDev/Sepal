@@ -32,8 +32,6 @@ export class Server {
 
         redis.connect();
 
-        redis.set("potato", "salad");
-
         this.server = server;
 
         database.watchCommands();
@@ -68,7 +66,7 @@ export class Server {
                     }
 
                     let channelExists = database.channelExists(packet.channel);
-                    console.log(channelExists);
+                    redis.set("salad", "potato");
 
                     if (!channelExists) {
                         let response = new ErrorPacket("Channel does not exist.", 1002, null)
