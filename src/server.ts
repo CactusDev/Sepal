@@ -32,9 +32,6 @@ export class Server {
 
         this.server = server;
 
-        redis.set("banana", "potato");
-        console.log(redis.get("banana"));
-
         database.watchCommands();
 
         server.on("connection", (connection: any) => {
