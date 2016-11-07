@@ -29,7 +29,7 @@ let Users = thinky.createModel("users", {
     username: type.string()
 })
 
-export class Database {
+export class Rethink {
     server: any;
 
     // TODO: Figure out variable types for all the things

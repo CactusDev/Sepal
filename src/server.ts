@@ -1,4 +1,4 @@
-import { Database } from "./database/database";
+import { Rethink } from "./rethink/rethink";
 import { Redis } from "./redis";
 
 import { Active } from "./active/active";
@@ -21,12 +21,12 @@ export class Server {
 
     listen() {
         let server = new WebSocketServer({ port: this.port });
-        let database = new Database(this);
+        let rethink = new Rethink(this);
         let active = new Active(this.redis, 5);
 
         this.server = server;
 
-        database.watchCommands();
+        rethink.watchCommands();
 
         server.on("connection", (connection: any) => {
             connection.on("message", (message: string) => {
@@ -57,7 +57,7 @@ export class Server {
                         connection.send(JSON.stringify(response.parse()));
                     }
 
-                    let channelExists = database.channelExists(packet.channel);
+                    let channelExists = rethink.channelExists(packet.channel);
 
                     if (!channelExists) {
                         let response = new ErrorPacket("Channel does not exist.", 1002, null)
