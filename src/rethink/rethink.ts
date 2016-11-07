@@ -1,5 +1,3 @@
-"use strict";
-
 import { Config } from "../config";
 
 const config = new Config().config;
@@ -16,7 +14,8 @@ let Commands = thinky.createModel("commands", {
     commandName: type.string(),
     response: type.string(),
     calls: type.number(),
-    channel: type.string()
+    channel: type.string(),
+    service: type.string()
 });
 
 let Quotes = thinky.createModel("quotes", {
@@ -30,7 +29,7 @@ let Users = thinky.createModel("users", {
     username: type.string()
 })
 
-export class Database {
+export class Rethink {
     server: any;
 
     // TODO: Figure out variable types for all the things

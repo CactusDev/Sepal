@@ -1,4 +1,3 @@
-
 export class ErrorPacket {
     error: string;
     code: number;

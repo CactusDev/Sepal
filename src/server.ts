@@ -1,75 +1,56 @@
-/// <reference path="../typings/globals/ws/index.d.ts" />
-/// <reference path="../typings/globals/node/index.d.ts" />
+import { Rethink } from "./rethink/rethink";
+import { Redis } from "./redis";
 
-import { Database } from "./database/database";
+import * as Logger from "./logging/logger";
 
 import { ErrorPacket } from "./packet/error";
 import { EventPacket } from "./packet/event";
 
-let Websocket = require("ws");
-let WebSocketServer = Websocket.Server;
+import { IncomingEventPacket } from "./packet/incoming/event";
+import { SubscribePacket } from "./packet/incoming/subscribe";
+
+const Websocket = require("ws");
+const WebSocketServer = Websocket.Server;
 
 export class Server {
-    port: number;
-    server: any;
-
+    server: this;
     clients: Object[];
 
-    constructor(port?: number) {
-        this.clients = [{}];
-        if (port) {
-            this.port = port;
-        }
-    }
+    constructor(public redis: Redis, public port = 8080) {}
 
     listen() {
         let server = new WebSocketServer({ port: this.port });
-        let database = new Database(this);
+        let rethink = new Rethink(this);
+
         this.server = server;
 
-        database.watchCommands();
+        rethink.watchCommands();
 
         server.on("connection", (connection: any) => {
             connection.on("message", (message: string) => {
                 let packet: any = {};
-                try {
-                    packet = JSON.parse(message);
-                } catch (e) {
-                    let response = new ErrorPacket("The packet is invalid or blank", 999, null);
-                    connection.send(JSON.stringify(response.parse()));
-                }
 
-                if (!packet.type) {
-                    let response = new ErrorPacket("Packet type was not supplied", 1000, null);
-                    connection.send(JSON.stringify(response.parse()));
-                } else if (!packet.channel) {
-                    let response = new ErrorPacket("Channel was not supplied", 1001, null);
-                    connection.send(JSON.stringify(response.parse()));
-                } else if (packet.type !== "subscribe") {
-                    let response = new ErrorPacket("Packet type is invalid", 1003, null);
-                    connection.send(JSON.stringify(response.parse()));
-                }
-
-                let channelExists = database.channelExists(packet.channel);
-                console.log(channelExists);
-
-                if (!channelExists) {
-                    let response = new ErrorPacket("Channel does not exist.", 1002, null)
-                    connection.send(JSON.stringify(response.parse()));
+                if (this.clients[connection] != null || this.clients[connection] !== "") {
+                    let packet = new IncomingEventPacket(JSON.parse(message));
+                    let error = packet.parse();
+                    if (error != null) {
+                        connection.send(new ErrorPacket(error, 1004, null).parse());
+                    }
                 } else {
-                    this.clients[connection] = packet.channel;
-
-                    let response = new EventPacket("subscribed", packet.channel, null, null);
-                    connection.send(JSON.stringify(response.parse()));
+                    let packet = new SubscribePacket(JSON.parse(message));
+                    let error = packet.parse();
+                    if (error != null) {
+                        connection.send(new ErrorPacket(error, 1004, null).parse());
+                    }
                 }
             });
         });
     }
 
-     broadcastToChannel(channel: string, action: string, event: string, data: Object) {
+     broadcastToChannel(channel: string, action: string, event: string, service: string, data: Object) {
         this.server.clients.forEach((client: any) => {
             if (channel === this.clients[client]) {
-                let response = new EventPacket(event, channel, action, data);
+                let response = new EventPacket(event, channel, action, service, data);
                 client.send(JSON.stringify(response.parse()));
             }
         });
