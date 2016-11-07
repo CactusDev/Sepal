@@ -1,7 +1,7 @@
 /// <reference path="../typings/globals/ws/index.d.ts" />
 /// <reference path="../typings/globals/node/index.d.ts" />
 
-import { Database } from "./database/database";
+import { Rethink } from "./rethink/rethink";
 import { Redis } from "./redis/redis";
 
 import { Active } from "./active/active";
@@ -30,7 +30,7 @@ export class Server {
 
     listen() {
         let server = new WebSocketServer({ port: this.port });
-        let database = new Database(this);
+        let rethink = new Rethink(this);
         let redis = new Redis();
         let active = new Active(redis, 5);
 
@@ -40,7 +40,7 @@ export class Server {
             .then(() => Logger.info("Connected to Redis."))
             .then(() => setInterval(() => active.checkActive(), 300000));
 
-        database.watchCommands();
+        rethink.watchCommands();
 
         server.on("connection", (connection: any) => {
             connection.on("message", (message: string) => {
@@ -71,7 +71,7 @@ export class Server {
                         connection.send(JSON.stringify(response.parse()));
                     }
 
-                    let channelExists = database.channelExists(packet.channel);
+                    let channelExists = rethink.channelExists(packet.channel);
 
                     if (!channelExists) {
                         let response = new ErrorPacket("Channel does not exist.", 1002, null)
