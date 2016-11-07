@@ -3,7 +3,10 @@ import * as Logger from "../logging/logger";
 
 interface ActiveUsers {
     [channelName: string]: {
-        [userId: string]: number;
+        [userId: string]: {
+            activeTime: number;
+            lastMessage: number;
+        };
     };
 }
 
@@ -20,24 +23,27 @@ export class Active {
     }
 
     addUser(uuid: string, channel: string) {
-        this.activeUsers[channel][uuid] = 0;
+        this.activeUsers[channel][uuid]["activeTime"] = 0;
+        this.activeUsers[channel][uuid]["lastMessage"] = 0;
+
         Logger.debug(`Added ${uuid} to ${channel}`);
     }
 
     deleteUser(uuid: string, channel: string) {
         Object.keys(this.activeUsers).forEach(channelName => {
             if (channelName === channel) {
-                Object.keys(channel).forEach(user => {
-                    if (user === uuid) {
-                        delete this.activeUsers[channel][user];
+                Object.keys(this.activeUsers[channelName]).forEach(userID => {
+                    if (userID === uuid) {
+                        delete this.activeUsers[channel][userID];
                     }
                 });
             }
         });
+
         Logger.debug(`Removed ${uuid} from ${channel}`);
     }
 
     watch() {
-        let time = new Date().getTime();
+        // let time = new Date().getTime();
     }
 }

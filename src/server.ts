@@ -21,7 +21,6 @@ export class Server {
     clients: Object[];
 
     constructor(port?: number) {
-        this.clients = [{}];
         if (port) {
             this.port = port;
         }
