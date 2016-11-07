@@ -81,20 +81,16 @@ export class Active {
         let inactiveUsers = this.check();
 
         Object.keys(inactiveUsers).forEach(checkingChannel => {
-            Logger.warning(checkingChannel);
             inactiveUsers[checkingChannel].forEach(checkingUser => {
-                Logger.warning(checkingUser);
                 Object.keys(this.activeUsers).forEach(channel => {
-                    Logger.warning(channel);
                     Object.keys(this.activeUsers[channel]).forEach(userID => {
-                        Logger.warning(userID);
                         if (channel === checkingChannel) {
                             if (checkingUser === userID) {
                                 Logger.debug(`Removing inactive user ${userID} from ${channel}`);
                                 this.redis.delete(`${channel}.${userID}`)
                                 this.activeUsers[channel][userID]["activeTime"] = -1;
                             } else {
-                                    this.redis.increment(`${channel}.${userID}`)
+                                this.redis.increment(`${channel}.${userID}`)
                                 this.activeUsers[channel][userID]["activeTime"] += 1;
                             }
                         }
