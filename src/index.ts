@@ -1,6 +1,8 @@
 import { Server } from "./server";
 import { Redis } from "./redis";
 
+import { Active } from "./active";
+
 import { Config } from "./config";
 import * as Logger from "./logging/logger";
 
@@ -16,6 +18,7 @@ if (config.env === "prod") {
 
 // Cretae a "Pub" connection to the Redis Server.
 const RedisPub = new Redis();
+const active = new Active(RedisPub, 5);
 
 // Note: You should probs do the Database connection here also. But for now your way works. Unless I get bored and do it for you.
 
@@ -27,4 +30,8 @@ RedisPub.connect()
         let server = new Server(RedisPub, 3000);
         // Start listening to connections.
         server.listen();
+
+        setTimeout(() => active.checkActive(), 1000);
+    }).then(() => {
+        active.addUser("testing-stuff-things", "innectic");
     });

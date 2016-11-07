@@ -18,16 +18,13 @@ interface IAFK {
 export class Active {
     activeUsers: IActiveUsers = {};
     activeTime: number;
-    redis: Redis;
 
-    constructor(redis: Redis, activeTime?: number) {
+    constructor(public redis: Redis, activeTime?: number) {
         if (activeTime != null) {
             this.activeTime = 4;
         } else {
             this.activeTime = activeTime;
         }
-
-        this.redis = redis;
     }
 
     addUser(uuid: string, channel: string) {
@@ -71,7 +68,7 @@ export class Active {
                         afk[channel] = [];
                     }
                     afk[channel].push(userID);
-                }
+            }
             });
         });
 
@@ -84,9 +81,13 @@ export class Active {
         let inactiveUsers = this.check();
 
         Object.keys(inactiveUsers).forEach(checkingChannel => {
-            Object.keys(inactiveUsers[checkingChannel]).forEach(checkingUser => {
+            Logger.warning(checkingChannel);
+            inactiveUsers[checkingChannel].forEach(checkingUser => {
+                Logger.warning(checkingUser);
                 Object.keys(this.activeUsers).forEach(channel => {
+                    Logger.warning(channel);
                     Object.keys(this.activeUsers[channel]).forEach(userID => {
+                        Logger.warning(userID);
                         if (channel === checkingChannel) {
                             if (checkingUser === userID) {
                                 Logger.debug(`Removing inactive user ${userID} from ${channel}`);
