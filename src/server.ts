@@ -4,6 +4,8 @@
 import { Database } from "./database/database";
 import { Redis } from "./redis/redis";
 
+import { Active } from "./active/active";
+
 import * as Logger from "./logging/logger";
 
 import { ErrorPacket } from "./packet/error";
@@ -30,11 +32,13 @@ export class Server {
         let server = new WebSocketServer({ port: this.port });
         let database = new Database(this);
         let redis = new Redis();
-
-        redis.connect()
-            .then(() => Logger.info("Connected to Redis."));
+        let active = new Active(redis, 5);
 
         this.server = server;
+
+        redis.connect()
+            .then(() => Logger.info("Connected to Redis."))
+            .then(() => setInterval(() => active.checkActive(), 300000));
 
         database.watchCommands();
 
