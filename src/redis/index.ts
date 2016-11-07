@@ -1,5 +1,3 @@
-/// <reference path="../../typings/globals/bluebird/index.d.ts" />
-
 import * as Promise from "bluebird";
 import * as Logger from "../logging/logger";
 
