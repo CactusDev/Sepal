@@ -1,7 +1,6 @@
-
 import * as Logger from "../logging/logger";
 
-import { Redis } from "../redis/redis";
+import { Redis } from "../redis";
 
 interface IActiveUsers {
     [channelName: string]: {

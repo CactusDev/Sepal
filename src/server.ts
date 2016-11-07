@@ -1,8 +1,5 @@
-/// <reference path="../typings/globals/ws/index.d.ts" />
-/// <reference path="../typings/globals/node/index.d.ts" />
-
 import { Database } from "./database/database";
-import { Redis } from "./redis/redis";
+import { Redis } from "./redis";
 
 import { Active } from "./active/active";
 
@@ -17,28 +14,17 @@ let Websocket = require("ws");
 let WebSocketServer = Websocket.Server;
 
 export class Server {
-    port: number;
     server: any;
-
     clients: Object[];
 
-    constructor(port?: number) {
-        if (port) {
-            this.port = port;
-        }
-    }
+    constructor(public redis: Redis, public port = 8080) {}
 
     listen() {
         let server = new WebSocketServer({ port: this.port });
         let database = new Database(this);
-        let redis = new Redis();
-        let active = new Active(redis, 5);
+        let active = new Active(this.redis, 5);
 
         this.server = server;
-
-        redis.connect()
-            .then(() => Logger.info("Connected to Redis."))
-            .then(() => setInterval(() => active.checkActive(), 300000));
 
         database.watchCommands();
 

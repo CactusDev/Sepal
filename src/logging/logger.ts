@@ -1,4 +1,3 @@
-
 const colors = require("colors/safe");
 
 export function info(message: string) {

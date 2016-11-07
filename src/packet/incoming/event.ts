@@ -1,4 +1,3 @@
-
 export class IncomingEventPacket {
     packet: any = {};
 

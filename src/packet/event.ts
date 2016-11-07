@@ -1,4 +1,3 @@
-
 export class EventPacket {
     event: string;
     channel: string;
