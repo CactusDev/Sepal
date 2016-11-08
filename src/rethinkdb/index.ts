@@ -1,6 +1,6 @@
 import { EventEmitter } from "events";
 
-const config: IConfig = require(`../configs/${process.env["NODE_ENV"] || "development"}`);
+const config: IConfig = require("../configs/development");
 
 const thinky = require("thinky")(config.rethinkdb);
 const type = thinky.type;

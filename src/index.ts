@@ -14,7 +14,7 @@ const raven = require("raven");
  * See: "configs" dir for an example and create a new version with the name of the
  *      env the appliction is running under.
  */
-const config: IConfig = require(`./configs/${process.env["NODE_ENV"] || "development"}`);
+const config: IConfig = require("./configs/development");
 
 const options = [
     { name: "debug", alias: "d", type: Boolean }
