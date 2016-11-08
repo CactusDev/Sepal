@@ -1,15 +1,11 @@
-import { Config } from "../config";
+import { EventEmitter } from "events";
 
-const config = new Config().config;
+const config: IConfig = require(`../configs/${process.env["NODE_ENV"] || "development"}`);
+
 const thinky = require("thinky")(config.rethinkdb);
 const type = thinky.type;
 
-interface Result {
-    "new_val": any;
-    "old_val": any;
-};
-
-let Commands = thinky.createModel("commands", {
+const Commands = thinky.createModel("commands", {
     id: type.string(),
     commandName: type.string(),
     response: type.string(),
@@ -18,23 +14,26 @@ let Commands = thinky.createModel("commands", {
     service: type.string()
 });
 
-let Quotes = thinky.createModel("quotes", {
+const Quotes = thinky.createModel("quotes", {
     id: type.string(),
     quoteID: type.number(),
     quote: type.string()
 });
 
-let Users = thinky.createModel("users", {
+const Users = thinky.createModel("users", {
     id: type.string(),
     username: type.string()
-})
+});
 
-export class Rethink {
-    server: any;
+interface Result {
+    "new_val": any;
+    "old_val": any;
+};
 
+export class RethinkDB extends EventEmitter {
     // TODO: Figure out variable types for all the things
-    constructor(server: any) {
-        this.server = server;
+    constructor(public config: IConfig) {
+        super();
     }
 
     watchCommands() {
@@ -44,14 +43,21 @@ export class Rethink {
                     console.log(error);
                     process.exit(1);
                 }
+                let action: "deleted" | "created" | "updated" = "updated";
 
                 if (document.isSaved() === false) {
-                    this.server.broadcastToChannel(document.channel, "deleted", "command", document);
+                    action = "deleted";
                 } else if (document.getOldValue() == null) {
-                    this.server.broadcastToChannel(document.channel, "created", "command", document);
-                } else {
-                    this.server.broadcastToChannel(document.channel, "updated", "command", document);
+                    action = "created";
                 }
+                // Emit the event back to the server.
+                this.emit("broadcast:channel", {
+                    channel: document.channel,
+                    action: "deleted",
+                    event: "command",
+                    service: "",
+                    data: document
+                });
             });
         }).error((error: any) => {
             console.log(error);
@@ -66,14 +72,21 @@ export class Rethink {
                     console.log(error);
                     process.exit(1);
                 }
+                let action: "deleted" | "created" | "updated" = "updated";
 
                 if (document.isSaved() === false) {
-                    this.server.broadcastToChannel(document.channel, "deleted", "quote", document);
+                    action = "deleted";
                 } else if (document.getOldValue() == null) {
-                    this.server.broadcastToChannel(document.channel, "created", "quote", document);
-                } else {
-                    this.server.broadcastToChannel(document.channel, "updated", "quote", document);
+                    action = "created";
                 }
+                // Emit the event back to the server.
+                this.emit("broadcast:channel", {
+                    channel: document.channel,
+                    action: "deleted",
+                    event: "quote",
+                    service: "",
+                    data: document
+                });
             });
         }).error((error: any) => {
             console.log(error);
