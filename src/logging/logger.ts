@@ -7,6 +7,12 @@ const raven = require("raven");
 
 let client: any = null;
 
+let debugMode = false;
+
+export function setDebug(debug: boolean) {
+    debugMode = debug;
+}
+
 if (config.env === "prod" && config.sentry.enabled) {
     client = new raven.Client(config.sentry.url);
 }
@@ -28,5 +34,7 @@ export function error(message: string) {
 }
 
 export function debug(message: string) {
-    console.log(colors.blue("DEBUG: ") + colors.white(message));
+    if (debugMode) {
+        console.log(colors.blue("DEBUG: ") + colors.white(message));
+    }
 }
