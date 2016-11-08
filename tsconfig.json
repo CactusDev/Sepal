@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "moduleResolution": "node",
     "target": "es6",
     "noImplicitAny": true,
     "removeComments": true,
@@ -14,6 +13,7 @@
     "./src/**/*"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "typings"
   ]
 }

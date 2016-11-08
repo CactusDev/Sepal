@@ -1,4 +1,4 @@
-import { Logger } from "../logging";
+import * as Logger from "../logging/logger";
 
 import { Redis } from "../redis";
 
@@ -76,7 +76,7 @@ export class Active {
     }
 
     checkActive() {
-        Logger.log("Checking for inactive users...");
+        Logger.info("Checking for inactive users...");
 
         let inactiveUsers = this.check();
 
