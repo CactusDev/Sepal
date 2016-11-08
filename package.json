@@ -16,6 +16,7 @@
     "colors": "^1.1.2",
     "command-line-args": "^3.0.2",
     "gulp": "^3.9.1",
+    "gulp-livereload": "^3.8.1",
     "gulp-typescript": "^3.1.2",
     "merge2": "^1.0.2",
     "raven": "^0.12.1",

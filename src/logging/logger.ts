@@ -17,7 +17,6 @@ if (config.env === "prod" && config.sentry.enabled) {
     client = new raven.Client(config.sentry.url);
 }
 
-
 export function info(message: string) {
     console.log(colors.green("INFO: ") + colors.white(message));
 }
