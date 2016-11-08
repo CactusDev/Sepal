@@ -38,25 +38,25 @@ export class RethinkDB extends EventEmitter {
 
     watchCommands() {
         Commands.changes().then((feed: any) => {
-            feed.each((error: any, document: any) => {
+            feed.each((error: any, doc: any) => {
                 if (error) {
                     console.log(error);
                     process.exit(1);
                 }
                 let action: "deleted" | "created" | "updated" = "updated";
 
-                if (document.isSaved() === false) {
+                if (doc.isSaved() === false) {
                     action = "deleted";
-                } else if (document.getOldValue() == null) {
+                } else if (doc.getOldValue() == null) {
                     action = "created";
                 }
                 // Emit the event back to the server.
                 this.emit("broadcast:channel", {
-                    channel: document.channel,
+                    channel: doc.channel,
                     action: "deleted",
                     event: "command",
                     service: "",
-                    data: document
+                    data: doc
                 });
             });
         }).error((error: any) => {
@@ -67,25 +67,25 @@ export class RethinkDB extends EventEmitter {
 
     watchQuotes() {
         Quotes.changes().then((feed: any) => {
-            feed.each((error: any, document: any) => {
+            feed.each((error: any, doc: any) => {
                 if (error) {
                     console.log(error);
                     process.exit(1);
                 }
                 let action: "deleted" | "created" | "updated" = "updated";
 
-                if (document.isSaved() === false) {
+                if (doc.isSaved() === false) {
                     action = "deleted";
-                } else if (document.getOldValue() == null) {
+                } else if (doc.getOldValue() == null) {
                     action = "created";
                 }
                 // Emit the event back to the server.
                 this.emit("broadcast:channel", {
-                    channel: document.channel,
+                    channel: doc.channel,
                     action: "deleted",
                     event: "quote",
                     service: "",
-                    data: document
+                    data: doc
                 });
             });
         }).error((error: any) => {
