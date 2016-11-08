@@ -6,10 +6,19 @@ import { Active } from "./active";
 import { Config } from "./config";
 import * as Logger from "./logging/logger";
 
+const cmdLineArgs = require("command-line-args");
+
 // I don't even with this.
 const config = new Config().config;
 
 const raven = require("raven");
+
+const options = [
+    { name: "debug", alias: "d", type: Boolean }
+];
+
+const parsed = cmdLineArgs(options);
+Logger.setDebug(parsed.debug);
 
 if (config.env === "prod") {
     if (config.sentry.enabled === false) {
@@ -38,6 +47,4 @@ RedisPub.connect()
         server.listen();
 
         setTimeout(() => active.checkActive(), 1000);
-    }).then(() => {
-        active.addUser("testing-stuff-things", "innectic");
     });
