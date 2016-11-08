@@ -1,7 +1,7 @@
-import { RethinkDB } from "./rethinkdb";
+import { Rethink } from "./rethink/rethink";
 import { Redis } from "./redis";
 
-import { Logger } from "./logging";
+import * as Logger from "./logging/logger";
 
 import { ErrorPacket } from "./packet/error";
 import { EventPacket } from "./packet/event";
@@ -9,26 +9,24 @@ import { EventPacket } from "./packet/event";
 import { IncomingEventPacket } from "./packet/incoming/event";
 import { SubscribePacket } from "./packet/incoming/subscribe";
 
-import { Server as WebSocketServer } from "ws";
+const Websocket = require("ws");
+const WebSocketServer = Websocket.Server;
 
 export class Server {
-    socket: WebSocketServer;
-    rethinkdb: RethinkDB;
+    server: this;
     clients: Object[];
 
-    constructor(public redis: Redis, public config: IConfig) {
-        // Create the Database models / listeners.
-        this.rethinkdb = new RethinkDB(this.config);
-        // Listen for changes sent from the RethinkDB server to broadcast to channels.
-        this.rethinkdb.on("broadcast:channel", (data: IChannelEvent) => {
-            this.broadcastToChannel(data.channel, data.action, data.event, data.service, data.data);
-        });
-    }
+    constructor(public redis: Redis, public port = 8080) {}
 
     listen() {
-        this.socket = new WebSocketServer({ port: this.config.socket.port });
-        // Listen for connections.
-        this.socket.on("connection", (connection: any) => {
+        let server = new WebSocketServer({ port: this.port });
+        let rethink = new Rethink(this);
+
+        this.server = server;
+
+        rethink.watchCommands();
+
+        server.on("connection", (connection: any) => {
             connection.on("message", (message: string) => {
                 let packet: any = {};
 
@@ -49,8 +47,8 @@ export class Server {
         });
     }
 
-     broadcastToChannel(channel: string, action: string, event: string, service: string, data: any) {
-        this.socket.clients.forEach((client: any) => {
+     broadcastToChannel(channel: string, action: string, event: string, service: string, data: Object) {
+        this.server.clients.forEach((client: any) => {
             if (channel === this.clients[client]) {
                 let response = new EventPacket(event, channel, action, service, data);
                 client.send(JSON.stringify(response.parse()));

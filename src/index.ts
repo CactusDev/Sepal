@@ -3,36 +3,31 @@ import { Redis } from "./redis";
 
 import { Active } from "./active";
 
-import {Logger } from "./logging";
+import { Config } from "./config";
+import * as Logger from "./logging/logger";
 
 const cmdLineArgs = require("command-line-args");
-const raven = require("raven");
 
-/**
- * This uses a config file which is created using the TypeScript compile.
- * 
- * See: "configs" dir for an example and create a new version with the name of the
- *      env the appliction is running under.
- */
-const config: IConfig = require(`./configs/${process.env["NODE_ENV"] || "development"}`);
+// I don't even with this.
+const config = new Config().config;
+
+const raven = require("raven");
 
 const options = [
     { name: "debug", alias: "d", type: Boolean }
 ];
 
-// Set the debug mode if needed.
 const parsed = cmdLineArgs(options);
-Logger.debugMode = parsed.debug;
+Logger.setDebug(parsed.debug);
 
-// Check that the env is production and that the dsn has been set to enable Sentry support.
 if (config.env === "prod") {
-    if (config.sentry.dsn) {
-        Logger.log("Initializing Setry...");
-        const client = new raven.Client(config.sentry.dsn);
+    if (config.sentry.enabled === false) {
+        Logger.warning("This instance is running in production, and Sentry is DISABLED");
+    } else {
+        Logger.info("Initializing Setry...");
+        const client = new raven.Client(config.sentry.url);
         client.patchGlobal();
-        // Give the logger the same Raven instance.
-        Logger.raven = client;
-        Logger.log("Sentry initialized...");
+        Logger.info("Sentry initialized...");
     }
 }
 
@@ -43,11 +38,11 @@ const active = new Active(RedisPub, 5);
 // Note: You should probs do the Database connection here also. But for now your way works. Unless I get bored and do it for you.
 
 // Connect to the Redis server.
-RedisPub.connect(config)
+RedisPub.connect()
     .then(() => {
-        Logger.log("Connected to the Redis server.");
+        Logger.info("Connected to the Redis server.");
         // Create the server.
-        let server = new Server(RedisPub, config);
+        let server = new Server(RedisPub, 3000);
         // Start listening to connections.
         server.listen();
 
