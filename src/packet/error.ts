@@ -19,6 +19,6 @@ export class ErrorPacket {
             "data": this.data
         };
 
-        return packet;
+        return JSON.stringify(packet);
     }
 }
