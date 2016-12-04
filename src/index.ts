@@ -40,8 +40,6 @@ if (config.env === "prod") {
 const RedisPub = new Redis();
 const active = new Active(RedisPub, 5);
 
-// Note: You should probs do the Database connection here also. But for now your way works. Unless I get bored and do it for you.
-
 // Connect to the Redis server.
 RedisPub.connect(config)
     .then(() => {
@@ -51,5 +49,5 @@ RedisPub.connect(config)
         // Start listening to connections.
         server.listen();
 
-        setTimeout(() => active.checkActive(), 1000);
+        setInterval(() => active.checkActive(), 1000);
     });
