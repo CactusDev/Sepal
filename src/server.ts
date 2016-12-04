@@ -1,6 +1,8 @@
 import { RethinkDB } from "./rethinkdb";
 import { Redis } from "./redis";
 
+import { Repeat } from "./repeat";
+
 import { Logger } from "./logging";
 
 import { ErrorPacket } from "./packet/error";
@@ -15,6 +17,7 @@ export class Server {
     socket: WebSocketServer;
     rethinkdb: RethinkDB;
     clients: Object[];
+    repeat: Repeat;
 
     constructor(public redis: Redis, public config: IConfig) {
         // Create the Database models / listeners.
@@ -23,6 +26,8 @@ export class Server {
         this.rethinkdb.on("broadcast:channel", (data: IChannelEvent) => {
             this.broadcastToChannel(data.channel, data.action, data.event, data.service, data.data);
         });
+
+        this.repeat = new Repeat(this, this.rethinkdb);
     }
 
     listen() {
@@ -43,6 +48,8 @@ export class Server {
                     let error = packet.parse();
                     if (error != null) {
                         connection.send(new ErrorPacket(error, 1004, null).parse());
+                    } else {
+                        this.repeat.startCurrent(packet.packet.channel);
                     }
                 }
             });

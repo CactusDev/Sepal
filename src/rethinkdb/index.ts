@@ -25,6 +25,13 @@ const Users = thinky.createModel("users", {
     username: type.string()
 });
 
+const Repeats = thinky.createModel("repeats", {
+    id: type.string(),
+    command: type.string(),
+    interval: type.number(),
+    channel: type.string()
+});
+
 interface Result {
     "new_val": any;
     "old_val": any;
@@ -41,7 +48,6 @@ export class RethinkDB extends EventEmitter {
             feed.each((error: any, doc: any) => {
                 if (error) {
                     console.log(error);
-                    process.exit(1);
                 }
                 let action: "deleted" | "created" | "updated" = "updated";
 
@@ -61,7 +67,6 @@ export class RethinkDB extends EventEmitter {
             });
         }).error((error: any) => {
             console.log(error);
-            process.exit(1);
         });
     }
 
@@ -70,7 +75,6 @@ export class RethinkDB extends EventEmitter {
             feed.each((error: any, doc: any) => {
                 if (error) {
                     console.log(error);
-                    process.exit(1);
                 }
                 let action: "deleted" | "created" | "updated" = "updated";
 
@@ -90,8 +94,41 @@ export class RethinkDB extends EventEmitter {
             });
         }).error((error: any) => {
             console.log(error);
-            process.exit(1);
         });
+    }
+
+    watchRepeats() {
+        Repeats.changes().then((feed: any) => {
+            feed.forEach((error: any, doc: any) => {
+                if (error) {
+                    console.log(error);
+                }
+                let action: "deleted" | "created" | "updated" = "updated";
+
+                if (doc.isSaved() === false) {
+                    action = "deleted";
+                } else if (doc.getOldValue() == null) {
+                    action = "created";
+                }
+                // Emit the event back to the server.
+                this.emit("broadcast:channel", {
+                    channel: doc.channel,
+                    action: "deleted",
+                    event: "repeat",
+                    service: "",
+                    data: doc
+                });
+            });
+        }).error((error: any) => {
+            console.log(error);
+        });
+    }
+
+    getRepeats(channel: String): Object {
+        Repeats.filter({ channel: channel }).run().then((res: Object) => {
+            return res;
+        });
+        return null;
     }
 
     channelExists(channel: string) {
