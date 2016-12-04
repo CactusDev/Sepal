@@ -29,7 +29,7 @@ export class Server {
 
     constructor(public redis: Redis, public config: IConfig) {
         // Create the Database models / listeners.
-        this.rethinkdb = new RethinkDB(this.config);
+        this.rethinkdb = new RethinkDB(this.config, this);
         // Listen for changes sent from the RethinkDB server to broadcast to channels.
         this.rethinkdb.on("broadcast:channel", (data: IChannelEvent) => {
             this.broadcastToChannel(data.channel, data.action, data.event, data.service, data.data);

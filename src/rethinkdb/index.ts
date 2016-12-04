@@ -1,5 +1,7 @@
 import { EventEmitter } from "events";
 
+import { Server } from "../server";
+
 const config: IConfig = require("../configs/development");
 
 const thinky = require("thinky")(config.rethinkdb);
@@ -39,7 +41,7 @@ interface Result {
 
 export class RethinkDB extends EventEmitter {
     // TODO: Figure out variable types for all the things
-    constructor(public config: IConfig) {
+    constructor(public config: IConfig, public server: Server) {
         super();
     }
 
@@ -86,7 +88,7 @@ export class RethinkDB extends EventEmitter {
                 // Emit the event back to the server.
                 this.emit("broadcast:channel", {
                     channel: doc.channel,
-                    action: "deleted",
+                    action: action,
                     event: "quote",
                     service: "",
                     data: doc
@@ -113,11 +115,20 @@ export class RethinkDB extends EventEmitter {
                 // Emit the event back to the server.
                 this.emit("broadcast:channel", {
                     channel: doc.channel,
-                    action: "deleted",
+                    action: action,
                     event: "repeat",
                     service: "",
                     data: doc
                 });
+
+                if (action === "created") {
+                    this.server.repeat.addRepeat(doc);
+                } else if (action === "deleted") {
+                    this.server.repeat.removeRepeat(doc);
+                } else if (action === "updated") {
+                    this.server.repeat.removeRepeat(doc.getOldValue());
+                    this.server.repeat.addRepeat(doc);
+                }
             });
         }).error((error: any) => {
             console.log(error);
