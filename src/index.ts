@@ -49,5 +49,5 @@ RedisPub.connect(config)
         // Start listening to connections.
         server.listen();
 
-        setInterval(() => active.checkActive(), 1000);
+        setInterval(() => active.checkActive(), 5000);
     });

@@ -5,7 +5,7 @@
   "main": "",
   "scripts": {
     "lint": "tslint \"src/**/*.ts\"",
-    "start": "node dist/index",
+    "start": "gulp && node dist/",
     "build": "tsc src/"
   },
   "author": "CactusDev",
