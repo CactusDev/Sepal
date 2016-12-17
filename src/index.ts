@@ -38,7 +38,9 @@ if (config.env === "prod") {
 
 // Cretae a "Pub" connection to the Redis Server.
 const RedisPub = new Redis();
-const active = new Active(RedisPub, 5);
+// const active = new Active(RedisPub, 5);
+
+// TODO: Fix the active stuff.
 
 // Connect to the Redis server.
 RedisPub.connect(config)
@@ -49,5 +51,5 @@ RedisPub.connect(config)
         // Start listening to connections.
         server.listen();
 
-        setInterval(() => active.checkActive(), 50000);
+        // setInterval(() => active.checkActive(), 50000);
     });

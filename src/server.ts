@@ -15,10 +15,10 @@ import { SubscribePacket } from "./packet/incoming/subscribe";
 import { Server as WebSocketServer } from "ws";
 
 interface IConnections {
-    [channel: string]: {
+    [channel: string]: [{
         connection: any;
-        channel: string;
-    }[];
+        channel: string
+    }];
 }
 
 export class Server {
@@ -51,42 +51,53 @@ export class Server {
                     packet = JSON.parse(message);
                 } catch (e) {
                     connection.send(new ErrorPacket("Packet is invalid or blank", 999, null).parse());
+                    return;
                 }
 
                 if (!packet.type) {
                     connection.send(new ErrorPacket("Packet doesn't contain a type", 1000, null).parse());
+                    return;
                 }
-
 
                 if (packet.type === "subscribe") {
                     let raw = new SubscribePacket(JSON.parse(message));
                     let error = raw.parse();
                     if (error != null) {
                         connection.send(new ErrorPacket(error, 1004, null).parse());
+                        return;
                     } else {
                         connection.send(new SuccessPacket(`Subscribed to events in ${packet.channel}`, "subscribe").parse());
+                        
+                        if (this.clients[packet.channel] === (null || undefined)) {
+                            this.clients[packet.channel] = [{ "connection": connection, "channel": packet.channel }];
+                        } else {
+                            this.clients[packet.channel].push({ "channel": packet.channel, "connection": connection });
+                        }
                     }
                 } else if (packet.type === "event") {
                     let raw = new IncomingEventPacket(JSON.parse(message));
                     let error = raw.parse();
+
                     if (error != null) {
                         connection.send(new ErrorPacket(error, 1004, null).parse());
+                        return;
                     } else {
                         this.repeat.startCurrent(packet.packet.channel);
                     }
                 } else {
                     connection.send(new ErrorPacket("Packet type is invalid", 1003, null).parse());
+                    return;
                 }
             });
         });
     }
 
-     broadcastToChannel(channel: string, action: string, event: string, service: string, data: any) {
-        this.socket.clients.forEach((client: any) => {
-            // if (channel === this.clients[channel]["channel"]) {
-            let response = new EventPacket(event, channel, action, service, data);
-            client.send(JSON.stringify(response.parse()));
-            // }
+    broadcastToChannel(channel: string, action: string, event: string, service: string, data: any) {
+        Object.keys(this.clients).forEach((client: any) => {
+            if (channel === this.clients[client][0]["channel"]) {
+                let response = new EventPacket(event, channel, action, service, data);
+                this.clients[client][0]["connection"].send(JSON.stringify(response.parse()));
+            }
         });
     }
 }

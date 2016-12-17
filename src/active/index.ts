@@ -12,7 +12,7 @@ interface IActiveUsers {
 }
 
 interface IAFK {
-    [channelName: string]: Array<string>;
+    [channelName: string]: string[];
 }
 
 export class Active {
