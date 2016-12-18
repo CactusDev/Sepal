@@ -20,8 +20,9 @@ const Commands = thinky.createModel("commands", {
 
 const Quotes = thinky.createModel("quotes", {
     id: type.string(),
-    quoteID: type.number(),
-    quote: type.string()
+    quoteId: type.number(),
+    quote: type.string(),
+    token: type.string()
 });
 
 const Users = thinky.createModel("users", {
