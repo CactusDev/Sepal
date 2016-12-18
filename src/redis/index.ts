@@ -1,8 +1,5 @@
 import * as Promise from "bluebird";
-import * as Logger from "../logging/logger";
-
-import { Config } from "../config";
-const config = new Config().config;
+import { Logger } from "../logging";
 
 const redis = require("redis");
 
@@ -13,7 +10,7 @@ export class Redis {
 
     client: any = null;
 
-    connect(): Promise<any> {
+    connect(config: IConfig): Promise<any> {
         return new Promise((resolve: any, reject: any) => {
             // Timeout to create an error if we're unable to connect.
             let connectionTimeout: any = setTimeout(() => {
@@ -47,7 +44,7 @@ export class Redis {
 
             this.client.on("end", () => {
                 clearTimeout(disconnectionTimeout);
-                Logger.info("Disconnected from Redis.");
+                Logger.log("Disconnected from Redis.");
                 resolve();
             });
             this.client.quit();

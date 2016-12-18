@@ -1,4 +1,4 @@
-import * as Logger from "../logging/logger";
+import { Logger } from "../logging";
 
 import { Redis } from "../redis";
 
@@ -12,7 +12,7 @@ interface IActiveUsers {
 }
 
 interface IAFK {
-    [channelName: string]: Array<string>;
+    [channelName: string]: string[];
 }
 
 export class Active {
@@ -76,7 +76,7 @@ export class Active {
     }
 
     checkActive() {
-        Logger.info("Checking for inactive users...");
+        Logger.log("Checking for inactive users...");
 
         let inactiveUsers = this.check();
 
