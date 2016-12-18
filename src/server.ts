@@ -40,6 +40,8 @@ export class Server {
 
     listen() {
         this.rethinkdb.watchCommands();
+        this.rethinkdb.watchQuotes();
+        this.rethinkdb.watchRepeats();
 
         this.socket = new WebSocketServer({ port: this.config.socket.port });
         // Listen for connections.
@@ -73,6 +75,7 @@ export class Server {
                         } else {
                             this.clients[packet.channel].push({ "channel": packet.channel, "connection": connection });
                         }
+                        this.repeat.startCurrent(packet.channel);
                     }
                 } else if (packet.type === "event") {
                     let raw = new IncomingEventPacket(JSON.parse(message));

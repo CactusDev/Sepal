@@ -101,7 +101,7 @@ export class RethinkDB extends EventEmitter {
 
     watchRepeats() {
         Repeats.changes().then((feed: any) => {
-            feed.forEach((error: any, doc: any) => {
+            feed.each((error: any, doc: any) => {
                 if (error) {
                     console.log(error);
                 }
@@ -136,10 +136,9 @@ export class RethinkDB extends EventEmitter {
     }
 
     getRepeats(channel: String): Object {
-        Repeats.filter({ channel: channel }).run().then((res: Object) => {
+        return Repeats.filter({ "channel": channel }).run().then((res: Object) => {
             return res;
         });
-        return null;
     }
 
     channelExists(channel: string) {
