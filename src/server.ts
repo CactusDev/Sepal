@@ -42,6 +42,7 @@ export class Server {
         this.rethinkdb.watchCommands();
         this.rethinkdb.watchQuotes();
         this.rethinkdb.watchRepeats();
+        this.rethinkdb.watchConfig();
 
         this.socket = new WebSocketServer({ port: this.config.socket.port });
         // Listen for connections.
