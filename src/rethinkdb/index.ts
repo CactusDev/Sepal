@@ -2,6 +2,8 @@ import { EventEmitter } from "events";
 
 import { Server } from "../server";
 
+import { Logger } from "../logging";
+
 const config: IConfig = require("../configs/development");
 
 const thinky = require("thinky")(config.rethinkdb);
@@ -49,7 +51,7 @@ export class RethinkDB extends EventEmitter {
         Commands.changes().then((feed: any) => {
             feed.each((error: any, doc: any) => {
                 if (error) {
-                    console.log(error);
+                    Logger.error(error);
                 }
                 let action: "deleted" | "created" | "updated" = "updated";
 
@@ -67,16 +69,14 @@ export class RethinkDB extends EventEmitter {
                     data: doc
                 });
             });
-        }).error((error: any) => {
-            console.log(error);
-        });
+        }).error((error: any) => Logger.error(error));
     }
 
     watchQuotes() {
         Quotes.changes().then((feed: any) => {
             feed.each((error: any, doc: any) => {
                 if (error) {
-                    console.log(error);
+                    Logger.error(error);
                 }
                 let action: "deleted" | "created" | "updated" = "updated";
 
@@ -94,16 +94,14 @@ export class RethinkDB extends EventEmitter {
                     data: doc
                 });
             });
-        }).error((error: any) => {
-            console.log(error);
-        });
+        }).error((error: any) => Logger.error(error));
     }
 
     watchRepeats() {
         Repeats.changes().then((feed: any) => {
             feed.each((error: any, doc: any) => {
                 if (error) {
-                    console.log(error);
+                    Logger.error(error);
                 }
                 let action: "deleted" | "created" | "updated" = "updated";
 
@@ -130,9 +128,7 @@ export class RethinkDB extends EventEmitter {
                     this.server.repeat.addRepeat(doc);
                 }
             });
-        }).error((error: any) => {
-            console.log(error);
-        });
+        }).error((error: any) => Logger.error(error));
     }
 
     getRepeats(channel: String): Object {
