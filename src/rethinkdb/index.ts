@@ -38,10 +38,10 @@ const Repeats = thinky.createModel("repeats", {
 
 const Config = thinky.createModel("config", {
     id: type.string(),
-    token: type.String(),
-    services: type.Object(),
-    announce: type.Object(),
-    spam: type.Object()
+    token: type.string(),
+    services: type.object(),
+    announce: type.object(),
+    spam: type.object()
 });
 
 interface Result {
