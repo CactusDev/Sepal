@@ -9,19 +9,8 @@ const config: IConfig = require("../configs/development");
 const thinky = require("thinky")(config.rethinkdb);
 const type = thinky.type;
 
-<<<<<<< HEAD
-const Commands = thinky.createModel("commands", {
-    id: type.string(),
-    commandName: type.string(),
-    response: type.string(),
-    calls: type.number(),
-    channel: type.string(),
-    service: type.string()
-});
-=======
 // TODO: Fix this
 const Commands = thinky.createModel("commands", type.any());
->>>>>>> d9df5b3... Don't remember what I did, but I know it was great
 
 const Quotes = thinky.createModel("quotes", {
     id: type.string(),
