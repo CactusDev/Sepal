@@ -5,3 +5,5 @@ yarn.lock
 dist/
 release/
 typings/
+
+configs/development.ts
