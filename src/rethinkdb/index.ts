@@ -41,6 +41,13 @@ const Config = thinky.createModel("config", {
     spam: type.object()
 });
 
+const Cached = thinky.createModel("cached", {
+    id: type.string(),
+    token: type.string(),
+    service: type.string(),
+    event: type.string()
+});
+
 interface Result {
     "new_val": any;
     "old_val": any;
@@ -180,6 +187,26 @@ export class RethinkDB extends EventEmitter {
     channelExists(channel: string) {
         Users.filter({ username: channel }).run().then((res: Object) => {
             return res === [];
+        });
+    }
+
+    addCached(data: Object) {
+        const document = new Cached({
+            token: data.token,
+            service: data.service,
+            event: data.event
+        });
+
+        document.saveAll().then((res: Object) => {
+            if (!res.id) {
+                Logger.error("Error creating a new cached document! " + JSON.stringify(res));
+            }
+        });
+    }
+
+    hasEvent(data: Object): boolean {
+        return Cached.filter({ token: data.token, channel: data.channel, service: data.service, event: data.event }).run().then((res: Object) => {
+            return res !== (null || undefined || {} || []);
         });
     }
 }
