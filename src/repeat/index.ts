@@ -7,7 +7,8 @@ interface IRepeats {
     [channel: string]: {
         [command: string]: {
             command: string;
-            interval: number
+            interval: number;
+            intervalVar: number;
         }[];
     };
 };
@@ -24,28 +25,31 @@ export class Repeat {
             return;
         }
 
-        Object.keys(Promise.resolve(repeats).then((data: any) => {
-            data.forEach((repeat: any) => {
-                this.startRepeat(repeat)
+        Promise.resolve(repeats).then((data: any) => {
+            data.forEach((repeat: any) => { 
+                console.log("Starting repeat " + repeat);
+                this.startRepeat(repeat);
+                console.log("Done");
             });
-        }));
+        });
     }
 
     addRepeat(packet: Object): boolean {
-        let data: any = packet;
-        if (!data.channel || !data.command || !data.interval) {
+        let repeat: any = packet;
+        
+        if (!repeat.token || !repeat.commandName || !repeat.period) {
             return false;
         }
 
-        if (this.activeRepeats[data.channel] == null) {
-            this.activeRepeats[data.channel] = {};
+        if (this.activeRepeats[repeat.token] === (null || undefined)) {
+            this.activeRepeats[repeat.token] = {};
         }
 
-        if (this.activeRepeats[data.channel] === (null || undefined)) {
-            this.activeRepeats[data.channel] = {};
+        if (this.activeRepeats[repeat.token][repeat.command] === (null || undefined)) {
+            this.activeRepeats[repeat.token][repeat.command] = [{ command: repeat.command, interval: repeat.period, intervalVar: this.startRepeat(repeat) }];
+        } else {
+            this.activeRepeats[repeat.token][repeat.command].push({ command: repeat.command, interval: repeat.period, intervalVar: this.startRepeat(repeat) });
         }
-        this.activeRepeats[data.channel][data.command].push({ command: data.command, interval: data.interval });
-        this.startRepeat(packet);
 
         return true;
     }
@@ -63,18 +67,21 @@ export class Repeat {
 
         if (this.activeRepeats[data.channel][data.command] == null) {
             return false;
-        }
+        }        
 
         this.activeRepeats[data.channel][data.command] = null;
 
         return true;
     }
 
-    private startRepeat(packet: Object) {
+    private startRepeat(packet: Object): number {
         let data: any = packet;
+        let intervalVar: number;
 
-        setInterval(() => {
-            this.server.broadcastToChannel(data.channel, null, "repeat", null, data);
-        }, data.interval);
+        intervalVar = setInterval(() => {
+            this.server.broadcastToChannel(data.token, null, "repeat", null, data);
+        }, data.period);
+
+        return intervalVar
     }
 }

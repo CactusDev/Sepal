@@ -9,19 +9,14 @@ const config: IConfig = require("../configs/development");
 const thinky = require("thinky")(config.rethinkdb);
 const type = thinky.type;
 
-const Commands = thinky.createModel("commands", {
-    id: type.string(),
-    commandName: type.string(),
-    response: type.string(),
-    calls: type.number(),
-    channel: type.string(),
-    service: type.string()
-});
+// TODO: Fix this
+const Commands = thinky.createModel("commands", type.any());
 
 const Quotes = thinky.createModel("quotes", {
     id: type.string(),
-    quoteID: type.number(),
-    quote: type.string()
+    quoteId: type.number(),
+    quote: type.string(),
+    token: type.string()
 });
 
 const Users = thinky.createModel("users", {
@@ -31,9 +26,11 @@ const Users = thinky.createModel("users", {
 
 const Repeats = thinky.createModel("repeats", {
     id: type.string(),
-    command: type.string(),
-    interval: type.number(),
-    channel: type.string()
+    period: type.number(),
+    token: type.string(),
+    repeatId: type.number(),
+    commandName: type.string(),
+    command: type.object()
 });
 
 const Config = thinky.createModel("config", {
@@ -62,6 +59,10 @@ export class RethinkDB extends EventEmitter {
                     Logger.error(error);
                 }
                 let action: "deleted" | "created" | "updated" = "updated";
+
+                if (doc === (null || undefined)) {    
+                    return;
+                }
 
                 if (doc.isSaved() === false) {
                     action = "deleted";
@@ -120,7 +121,7 @@ export class RethinkDB extends EventEmitter {
                 }
                 // Emit the event back to the server.
                 this.emit("broadcast:channel", {
-                    channel: doc.channel,
+                    token: doc.token,
                     action: action,
                     event: "repeat",
                     service: "",
@@ -165,7 +166,13 @@ export class RethinkDB extends EventEmitter {
     }
 
     getRepeats(channel: String): Object {
-        return Repeats.filter({ "channel": channel }).run().then((res: Object) => {
+        return Repeats.filter({ "token": channel }).run().then((res: Object) => {
+            return res;
+        });
+    }
+
+    getAllReapeats(): any {
+        return Repeats.run().then((res: any) => {
             return res;
         });
     }

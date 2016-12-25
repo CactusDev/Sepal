@@ -24,7 +24,7 @@ interface IConfig {
 }
 
 interface IChannelEvent {
-  channel: string;
+  token: string;
   action: string;
   event: string;
   service: string;

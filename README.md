@@ -10,7 +10,7 @@ Well, making a pull req would be AWESOME.
 
 ## I found a bug! WHAT DO?
 
-Make an issue, that follows our template.
+Make an issue that follows our template.
 
 ## Licence
 
