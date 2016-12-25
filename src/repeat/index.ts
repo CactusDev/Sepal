@@ -4,7 +4,7 @@ import { RethinkDB } from "../rethinkdb";
 
 // Sidenote: Interval is in MS
 interface IRepeats {
-    [channel: string]: {
+    [token: string]: {
         [command: string]: {
             command: string;
             interval: number;
@@ -17,22 +17,6 @@ export class Repeat {
     private activeRepeats: IRepeats = {};
 
     constructor(public server: Server, public rethink: RethinkDB) { }
-
-    startCurrent(channel: String) {
-        let repeats = this.rethink.getRepeats(channel);
-
-        if (repeats === null) {
-            return;
-        }
-
-        Promise.resolve(repeats).then((data: any) => {
-            data.forEach((repeat: any) => { 
-                console.log("Starting repeat " + repeat);
-                this.startRepeat(repeat);
-                console.log("Done");
-            });
-        });
-    }
 
     addRepeat(packet: Object): boolean {
         let repeat: any = packet;
@@ -56,6 +40,8 @@ export class Repeat {
 
     removeRepeat(packet: Object): boolean {
         let data: any = packet;
+
+        console.log(data);
 
         if (!data.channel || !data.command || !data.interval) {
             return false;

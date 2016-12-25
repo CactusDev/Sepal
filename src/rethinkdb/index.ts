@@ -9,8 +9,16 @@ const config: IConfig = require("../configs/development");
 const thinky = require("thinky")(config.rethinkdb);
 const type = thinky.type;
 
-// TODO: Fix this
-const Commands = thinky.createModel("commands", type.any());
+const Commands = thinky.createModel("commands", {
+    id: type.string(),
+    name: type.string(),
+    response: type.object(),
+    createdAt: type.string(),
+    token: type.string(),
+    userLevel: type.number(),
+    enabled: type.boolean(),
+    arguments: type.object()
+});
 
 const Quotes = thinky.createModel("quotes", {
     id: type.string(),
@@ -165,20 +173,14 @@ export class RethinkDB extends EventEmitter {
         }).error((error: any) => Logger.error(error));
     }
 
-    getRepeats(channel: String): Object {
-        return Repeats.filter({ "token": channel }).run().then((res: Object) => {
-            return res;
-        });
-    }
-
     getAllReapeats(): any {
         return Repeats.run().then((res: any) => {
             return res;
         });
     }
 
-    channelExists(channel: string) {
-        Users.filter({ username: channel }).run().then((res: Object) => {
+    channelExists(channel: string): boolean {
+        return Users.filter({ token: channel }).run().then((res: Object) => {
             return res === [];
         });
     }
