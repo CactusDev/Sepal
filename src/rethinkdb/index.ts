@@ -13,11 +13,10 @@ const Commands = thinky.createModel("commands", {
     id: type.string(),
     name: type.string(),
     response: type.object(),
-    createdAt: type.string(),
     token: type.string(),
     userLevel: type.number(),
     enabled: type.boolean(),
-    arguments: type.object()
+    arguments: type.any(),
 });
 
 const Quotes = thinky.createModel("quotes", {
@@ -37,7 +36,8 @@ const Repeats = thinky.createModel("repeats", {
     period: type.number(),
     token: type.string(),
     repeatId: type.number(),
-    commandName: type.string()
+    command: type.string(),
+    arguments: type.any()
 });
 
 const Config = thinky.createModel("config", {
@@ -181,6 +181,12 @@ export class RethinkDB extends EventEmitter {
     channelExists(channel: string): boolean {
         return Users.filter({ token: channel }).run().then((res: Object) => {
             return res === [];
+        });
+    }
+
+    getCommandName(command: string): any{
+        return Commands.filter({ id: command }).run().then((res: Object) => {
+            return res;
         });
     }
 }

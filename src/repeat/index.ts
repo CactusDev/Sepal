@@ -21,7 +21,7 @@ export class Repeat {
     addRepeat(packet: Object): boolean {
         let repeat: any = packet;
         
-        if (!repeat.token || !repeat.commandName || !repeat.period) {
+        if (!repeat.token || !repeat.command || !repeat.period) {
             return false;
         }
 
@@ -30,12 +30,18 @@ export class Repeat {
         }
 
         repeat.period = repeat.period * 1000
-
+        
+        Promise.resolve(this.rethink.getCommandName(repeat.command)).then((data: any) => {
+            repeat.command = data[0]["name"];
+        });
+ 
         if (this.activeRepeats[repeat.token][repeat.command] === (null || undefined)) {
             this.activeRepeats[repeat.token][repeat.command] = [{ command: repeat.command, interval: repeat.period, intervalVar: this.startRepeat(repeat) }];
         } else {
             this.activeRepeats[repeat.token][repeat.command].push({ command: repeat.command, interval: repeat.period, intervalVar: this.startRepeat(repeat) });
         }
+
+        console.log("REPEAT: ", repeat);
 
         return true;
     }
