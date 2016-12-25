@@ -6,4 +6,4 @@ dist/
 release/
 typings/
 
-configs/development.ts
+src/configs/development.ts

@@ -29,6 +29,7 @@ export class Server {
 
     constructor(public redis: Redis, public config: IConfig) {
         // Create the Database models / listeners.
+        Logger.log("Connecting to Rethink...");
         this.rethinkdb = new RethinkDB(this.config, this);
         // Listen for changes sent from the RethinkDB server to broadcast to channels.
         this.rethinkdb.on("broadcast:channel", (data: IChannelEvent) => {
@@ -45,8 +46,13 @@ export class Server {
         this.rethinkdb.watchConfig();
 
         Promise.resolve(this.rethinkdb.getAllReapeats()).then((data: any) => {
+            if (data === (null || undefined || {})) {
+                return;
+            }
+
             Logger.log("Starting repeats...");
-            data.forEach((repeat: any) => {
+
+            data.forEach((repeat: Object) => {
                 this.repeat.addRepeat(repeat);
             });
         });
