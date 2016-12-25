@@ -29,10 +29,12 @@ export class Repeat {
             this.activeRepeats[repeat.token] = {};
         }
 
+        repeat.period = repeat.period * 1000
+
         if (this.activeRepeats[repeat.token][repeat.command] === (null || undefined)) {
-            this.activeRepeats[repeat.token][repeat.command] = [{ command: repeat.command, interval: repeat.period * 1000, intervalVar: this.startRepeat(repeat) }];
+            this.activeRepeats[repeat.token][repeat.command] = [{ command: repeat.command, interval: repeat.period, intervalVar: this.startRepeat(repeat) }];
         } else {
-            this.activeRepeats[repeat.token][repeat.command].push({ command: repeat.command, interval: repeat.period * 1000, intervalVar: this.startRepeat(repeat) });
+            this.activeRepeats[repeat.token][repeat.command].push({ command: repeat.command, interval: repeat.period, intervalVar: this.startRepeat(repeat) });
         }
 
         return true;
