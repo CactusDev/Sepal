@@ -37,8 +37,7 @@ const Repeats = thinky.createModel("repeats", {
     period: type.number(),
     token: type.string(),
     repeatId: type.number(),
-    commandName: type.string(),
-    command: type.object()
+    commandName: type.string()
 });
 
 const Config = thinky.createModel("config", {
