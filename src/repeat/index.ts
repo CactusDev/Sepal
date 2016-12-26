@@ -29,6 +29,13 @@ export class Repeat {
         }
 
         repeat.period = repeat.period * 1000
+        Promise.resolve(this.rethink.getCommand(repeat.command)).then((data: any) => {
+            if (data != ([] || null || undefined || {})) {
+                repeat.command = data[0];
+            } else {
+                repeat.command = {};
+            }
+        });
 
         let document: any = {
             command: repeat.command,
