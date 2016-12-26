@@ -2,15 +2,14 @@
 import { Server } from "../server";
 import { RethinkDB } from "../rethinkdb";
 
-// Sidenote: Interval is in MS
 interface IRepeats {
     [token: string]: {
         [command: string]: {
             command: string;
-            interval: number;
-            intervalVar: number;
-        }[];
-    };
+            period: number;
+            timeout: number;
+        };
+    }[];
 };
 
 export class Repeat {
@@ -21,55 +20,38 @@ export class Repeat {
     addRepeat(packet: Object): boolean {
         let repeat: any = packet;
         
-        if (!repeat.token || !repeat.commandName || !repeat.period) {
+        if (!repeat.token || !repeat.command || !repeat.period) {
             return false;
         }
 
         if (this.activeRepeats[repeat.token] === (null || undefined)) {
-            this.activeRepeats[repeat.token] = {};
+            this.activeRepeats[repeat.token] = [];
         }
 
         repeat.period = repeat.period * 1000
 
-        if (this.activeRepeats[repeat.token][repeat.command] === (null || undefined)) {
-            this.activeRepeats[repeat.token][repeat.command] = [{ command: repeat.command, interval: repeat.period, intervalVar: this.startRepeat(repeat) }];
-        } else {
-            this.activeRepeats[repeat.token][repeat.command].push({ command: repeat.command, interval: repeat.period, intervalVar: this.startRepeat(repeat) });
-        }
+        let document: any = {
+            command: repeat.command,
+            period: repeat.period,
+            timeout: this.startRepeat(repeat)
+        };
+
+        this.activeRepeats[repeat.token][repeat.command] = document;
 
         return true;
     }
 
-    removeRepeat(packet: Object): boolean {
+    removeRepeat(packet: Object) {
         let data: any = packet;
 
-        console.log(data);
-
-        if (!data.channel || !data.command || !data.interval) {
-            return false;
-        }
-
-        if (this.activeRepeats[data.channel] == null) {
-            return false;
-        }
-
-        if (this.activeRepeats[data.channel][data.command] == null) {
-            return false;
-        }        
-
-        this.activeRepeats[data.channel][data.command] = null;
-
-        return true;
+        delete this.activeRepeats[data.token][data.command]
     }
 
     private startRepeat(packet: Object): number {
         let data: any = packet;
-        let intervalVar: number;
 
-        intervalVar = setInterval(() => {
+        return setInterval(() => {
             this.server.broadcastToChannel(data.token, null, "repeat", null, data);
         }, data.period);
-
-        return intervalVar
     }
 }
