@@ -51,7 +51,7 @@ export class Repeat {
     removeRepeat(packet: Object) {
         let data: any = packet;
 
-        clearTimeout(this.activeRepeats[data.token][data.command][0].timeout);
+        clearInterval(this.activeRepeats[data.token][data.command][0].timeout);
         delete this.activeRepeats[data.token][data.command];
     }
 
