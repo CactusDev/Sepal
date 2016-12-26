@@ -183,4 +183,10 @@ export class RethinkDB extends EventEmitter {
             return res === [];
         });
     }
+
+    getCommand(uuid: string): any {
+        return Commands.filter({ id: uuid }).run().then((res: Object) => {
+            return res;
+        });
+    }
 }
