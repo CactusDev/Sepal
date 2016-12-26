@@ -51,7 +51,8 @@ export class Repeat {
     removeRepeat(packet: Object) {
         let data: any = packet;
 
-        delete this.activeRepeats[data.token][data.command]
+        clearTimeout(this.activeRepeats[data.token][data.command][0].timeout);
+        delete this.activeRepeats[data.token][data.command];
     }
 
     private startRepeat(packet: Object): number {
