@@ -51,8 +51,15 @@ export class Repeat {
     removeRepeat(packet: Object) {
         let data: any = packet;
 
-        clearInterval(this.activeRepeats[data.token][data.command][0].timeout);
-        delete this.activeRepeats[data.token][data.command];
+        Object.keys(this.activeRepeats[data.token][data.command]).forEach((repeat: any) => {
+            if (repeat.command = data.command) {
+                console.log("FOUND");
+                clearInterval(this.activeRepeats[data.token][data.command][repeat].timeout);
+                console.log("CLEAR");
+                delete this.activeRepeats[data.token][data.command];
+                console.log("DELETE");
+            }
+        });
     }
 
     private startRepeat(packet: Object): number {
