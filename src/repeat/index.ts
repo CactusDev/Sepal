@@ -1,4 +1,3 @@
-
 import { Server } from "../server";
 import { RethinkDB } from "../rethinkdb";
 
@@ -17,56 +16,46 @@ export class Repeat {
 
     constructor(public server: Server, public rethink: RethinkDB) { }
 
-    addRepeat(packet: Object): boolean {
+    addRepeat(packet: Object) {
         let repeat: any = packet;
-        
-        if (!repeat.token || !repeat.command || !repeat.period) {
-            return false;
+
+        if (!repeat.token || !repeat.commandName || !repeat.period) {
+            return;
         }
 
-        if (this.activeRepeats[repeat.token] === (null || undefined)) {
-            this.activeRepeats[repeat.token] = [];
-        }
-
-        repeat.period = repeat.period * 1000
-        Promise.resolve(this.rethink.getCommand(repeat.command)).then((data: any) => {
-            if (data != ([] || null || undefined || {})) {
-                repeat.command = data[0];
-            } else {
-                repeat.command = {};
+        Promise.resolve(this.rethink.getCommand(repeat.commandName)).then((data: any) => {
+            if (data.length == 0) {
+		return;
             }
+
+            if (this.activeRepeats[repeat.token] === (null || undefined)) {
+                this.activeRepeats[repeat.token] = [];
+            }
+
+            console.log(data);
+
+            repeat.period = repeat.period * 1000
+            repeat.timeout = this.startRepeat(repeat);
+            repeat.response = data[0]["response"];
+
+            this.activeRepeats[repeat.token][repeat.commandName] = repeat;
         });
-
-        let document: any = {
-            command: repeat.command,
-            period: repeat.period,
-            timeout: this.startRepeat(repeat)
-        };
-
-        this.activeRepeats[repeat.token][repeat.command] = document;
-
-        return true;
     }
 
     removeRepeat(packet: Object) {
-        let data: any = packet;
+        let repeat: any = packet;
+        let timeout: any = this.activeRepeats[repeat.token][repeat.commandName]["timeout"];
 
-        Object.keys(this.activeRepeats[data.token][data.command]).forEach((repeat: any) => {
-            if (repeat.command = data.command) {
-                console.log("FOUND");
-                clearInterval(this.activeRepeats[data.token][data.command][repeat].timeout);
-                console.log("CLEAR");
-                delete this.activeRepeats[data.token][data.command];
-                console.log("DELETE");
-            }
-        });
+        clearInterval(timeout);
+        delete this.activeRepeats[repeat["token"]][repeat.command];
     }
 
     private startRepeat(packet: Object): number {
         let data: any = packet;
 
         return setInterval(() => {
-            this.server.broadcastToChannel(data.token, null, "repeat", null, data);
+            this.server.broadcastToChannel(data.token, null, "repeat", null, data)
         }, data.period);
     }
 }
+

@@ -43,7 +43,7 @@ const RedisPub = new Redis();
 // TODO: Fix the active stuff.
 
 // Connect to the Redis server.
-RedisPub.connect(config)
+/*RedisPub.connect(config)
     .then(() => {
         Logger.log("Connected to the Redis server.");
         // Create the server.
@@ -52,4 +52,7 @@ RedisPub.connect(config)
         server.listen();
 
         // setInterval(() => active.checkActive(), 50000);
-    });
+    });*/
+
+let server = new Server(null, config);
+server.listen();

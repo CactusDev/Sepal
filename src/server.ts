@@ -33,7 +33,7 @@ export class Server {
         this.rethinkdb = new RethinkDB(this.config, this);
         // Listen for changes sent from the RethinkDB server to broadcast to channels.
         this.rethinkdb.on("broadcast:channel", (data: IChannelEvent) => {
-            this.broadcastToChannel(data.token, data.action, data.event, data.service, data.data);
+            this.broadcastToChannel(data["data"].token, data.action, data.event, data.service, data.data);
         });
 
         this.repeat = new Repeat(this, this.rethinkdb);
