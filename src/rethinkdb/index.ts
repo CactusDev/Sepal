@@ -8,47 +8,7 @@ import { IRepeat } from "../repeat";
 
 const config: IConfig = require("../configs/development");
 
-const thinky = require("thinky")(config.rethinkdb);
-const type = thinky.type;
-
-const Commands = thinky.createModel("commands", {
-    id: type.string(),
-    name: type.string(),
-    response: type.object(),
-    token: type.string(),
-    userLevel: type.number(),
-    enabled: type.boolean(),
-    arguments: type.any(),
-});
-
-const Quotes = thinky.createModel("quotes", {
-    id: type.string(),
-    quoteId: type.number(),
-    quote: type.string(),
-    token: type.string()
-});
-
-const Users = thinky.createModel("users", {
-    id: type.string(),
-    username: type.string()
-});
-
-const Repeats = thinky.createModel("repeats", {
-    id: type.string(),
-    period: type.number(),
-    token: type.string(),
-    repeatId: type.number(),
-    command: type.string(),
-    arguments: type.any()
-});
-
-const Config = thinky.createModel("config", {
-    id: type.string(),
-    token: type.string(),
-    services: type.object(),
-    announce: type.object(),
-    spam: type.object()
-});
+const Thinky = require("thinky");
 
 /**
  * Result from the database
@@ -70,6 +30,13 @@ interface IResult {
 export class RethinkDB extends EventEmitter {
     // TODO: Figure out variable types for all the things
 
+    rethink: any;
+    commands: any;
+    quotes: any;
+    users: any;
+    repeats: any;
+    userConfig: any;
+
     /**
      * Creates an instance of RethinkDB.
      * 
@@ -82,6 +49,52 @@ export class RethinkDB extends EventEmitter {
         super();
     }
 
+    connect() {
+        this.rethink = new Thinky(config.rethinkdb).then(() => {
+            // This is gross
+            const type = Thinky.type;
+
+            this.commands = Thinky.createModel("commands", {
+                id: type.string(),
+                name: type.string(),
+                response: type.object(),
+                token: type.string(),
+                userLevel: type.number(),
+                enabled: type.boolean(),
+                arguments: type.any(),
+            });
+
+            this.quotes = Thinky.createModel("quotes", {
+                id: type.string(),
+                quoteId: type.number(),
+                quote: type.string(),
+                token: type.string()
+            });
+
+            this.users = Thinky.createModel("users", {
+                id: type.string(),
+                username: type.string()
+            });
+
+            this.repeats = Thinky.createModel("repeats", {
+                id: type.string(),
+                period: type.number(),
+                token: type.string(),
+                repeatId: type.number(),
+                command: type.string(),
+                arguments: type.any()
+            });
+
+            this.config = Thinky.createModel("config", {
+                id: type.string(),
+                token: type.string(),
+                services: type.object(),
+                announce: type.object(),
+                spam: type.object()
+            });
+        }).catch((reason: string) => Logger.error(reason));
+    }
+
     /**
      * Watch the commands table
      * 
@@ -89,7 +102,7 @@ export class RethinkDB extends EventEmitter {
      * @memberOf RethinkDB
      */
     watchCommands() {
-        Commands.changes().then((feed: any) => {
+        this.commands.changes().then((feed: any) => {
             feed.each((error: any, doc: any) => {
                 if (error) {
                     Logger.error(error);
@@ -124,7 +137,7 @@ export class RethinkDB extends EventEmitter {
      * @memberOf RethinkDB
      */
     watchQuotes() {
-        Quotes.changes().then((feed: any) => {
+        this.quotes.changes().then((feed: any) => {
             feed.each((error: any, doc: any) => {
                 if (error) {
                     Logger.error(error);
@@ -155,7 +168,7 @@ export class RethinkDB extends EventEmitter {
      * @memberOf RethinkDB
      */
     watchRepeats() {
-        Repeats.changes().then((feed: any) => {
+        this.repeats.changes().then((feed: any) => {
             feed.each((error: any, doc: any) => {
                 if (error) {
                     Logger.error(error);
@@ -195,7 +208,7 @@ export class RethinkDB extends EventEmitter {
      * @memberOf RethinkDB
      */
     watchConfig() {
-        Config.changes().then((feed: any) => {
+        this.userConfig.changes().then((feed: any) => {
             feed.each((error: any, doc: any) => {
                 if (error) {
                     Logger.error(error);
@@ -227,7 +240,7 @@ export class RethinkDB extends EventEmitter {
      * @memberOf RethinkDB
      */
     getAllReapeats(): Promise<IRepeat[]> {
-        return Repeats.run().then((res: IRepeat[]) => {
+        return this.repeats.run().then((res: IRepeat[]) => {
             return res;
         });
     }
@@ -241,7 +254,7 @@ export class RethinkDB extends EventEmitter {
      * @memberOf RethinkDB
      */
     channelExists(channel: string): boolean {
-        return Users.filter({ token: channel }).run().then((res: Object) => {
+        return this.users.filter({ token: channel }).run().then((res: Object) => {
             return res === [];
         });
     }
@@ -255,7 +268,7 @@ export class RethinkDB extends EventEmitter {
      * @memberOf RethinkDB
      */
     getCommandName(command: string): any{
-        return Commands.filter({ id: command }).run().then((res: Object) => {
+        return this.commands.filter({ id: command }).run().then((res: Object) => {
             return res;
         });
     }

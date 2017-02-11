@@ -32,6 +32,8 @@ if (config.env === "prod") {
         // Give the logger the same Raven instance.
         Logger.raven = client;
         Logger.log("Sentry initialized...");
+    } else {
+        Logger.log("UNABLE TO USE SENTRY! SEPAL RUNNING IN PROD MODE! THIS IS DANGEROUS");
     }
 }
 
