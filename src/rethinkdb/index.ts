@@ -4,6 +4,8 @@ import { Server } from "../server";
 
 import { Logger } from "../logging";
 
+import { IRepeat } from "../repeat";
+
 const config: IConfig = require("../configs/development");
 
 const thinky = require("thinky")(config.rethinkdb);
@@ -224,8 +226,8 @@ export class RethinkDB extends EventEmitter {
      * 
      * @memberOf RethinkDB
      */
-    getAllReapeats(): any {
-        return Repeats.run().then((res: any) => {
+    getAllReapeats(): Promise<IRepeat[]> {
+        return Repeats.run().then((res: IRepeat[]) => {
             return res;
         });
     }

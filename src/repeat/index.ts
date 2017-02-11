@@ -17,7 +17,12 @@ interface IRepeats {
     };
 };
 
-// TODO: Stop using objects for the repeat stuff. Use custom interfaces
+export interface IRepeat {
+    token: string;
+    command: string;
+    period: number;
+    channel: string;
+}
 
 /**
  * Handle repeating events
@@ -41,63 +46,57 @@ export class Repeat {
     /**
      * Add a new repeat
      * 
-     * @param {Object} packet
+     * @param {IRepeat} repeat
      * @returns {boolean}
      * 
      * @memberOf Repeat
      */
-    addRepeat(packet: Object): boolean {
-        let repeat: any = packet;
-        
-        if (!repeat.token || !repeat.command || !repeat.period) {
-            return false;
-        }
-
-        if (this.activeRepeats[repeat.token] === (null || undefined)) {
+    addRepeat(repeat: IRepeat): boolean {
+        if (!this.activeRepeats[repeat.token]) {
             this.activeRepeats[repeat.token] = {};
         }
-
-        repeat.period = repeat.period * 1000
         
         this.rethink.getCommandName(repeat.command).then((data: any) => {
             repeat.command = data[0]["name"];
         });
+
+        const repeating = {
+            command: repeat.command,
+            interval: repeat.period * 1000,
+            intervalVar: this.startRepeat(repeat)
+        }
  
-        if (this.activeRepeats[repeat.token][repeat.command] === (null || undefined)) {
-            this.activeRepeats[repeat.token][repeat.command] = [{ command: repeat.command, interval: repeat.period, intervalVar: this.startRepeat(repeat) }];
+        if (!this.activeRepeats[repeat.token][repeat.command]) {
+            this.activeRepeats[repeat.token][repeat.command] = [repeating];
         } else {
-            this.activeRepeats[repeat.token][repeat.command].push({ command: repeat.command, interval: repeat.period, intervalVar: this.startRepeat(repeat) });
+            this.activeRepeats[repeat.token][repeat.command].push(repeating);
         }
 
-        return true;
+        return false;
     }
 
     /**
      * Remove a running repeat
      * 
-     * @param {Object} packet
+     * @param {IRepeat} repeat
      * @returns {boolean}
      * 
      * @memberOf Repeat
      */
-    removeRepeat(packet: Object): boolean {
-        let data: any = packet;
-
-        console.log(data);
-
-        if (!data.channel || !data.command || !data.interval) {
+    removeRepeat(repeat: IRepeat): boolean {
+        if (!repeat.channel || !repeat.command || !repeat.period) {
             return false;
         }
 
-        if (this.activeRepeats[data.channel] == null) {
+        if (this.activeRepeats[repeat.channel] == null) {
             return false;
         }
 
-        if (this.activeRepeats[data.channel][data.command] == null) {
+        if (this.activeRepeats[repeat.channel][repeat.command] == null) {
             return false;
         }        
 
-        this.activeRepeats[data.channel][data.command] = null;
+        this.activeRepeats[repeat.channel][repeat.command] = null;
 
         return true;
     }
@@ -106,18 +105,17 @@ export class Repeat {
      * Start a new repeat
      * 
      * @private
-     * @param {Object} packet
-     * @returns {number}
+     * @param {IRepeat} repeat
+     * @returns {any}
      * 
      * @memberOf Repeat
      */
-    private startRepeat(packet: Object): number {
-        let data: any = packet;
-        let intervalVar: number;
+    private startRepeat(repeat: IRepeat): any {
+        let intervalVar: any;
 
         intervalVar = setInterval(() => {
-            this.server.broadcastToChannel(data.token, null, "repeat", null, data);
-        }, data.period);
+            this.server.broadcastToChannel(repeat.token, null, "repeat", null, repeat);
+        }, repeat.period);
 
         return intervalVar
     }

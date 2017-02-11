@@ -12,6 +12,8 @@ import { SuccessPacket } from "./packet/success";
 import { IncomingEventPacket } from "./packet/incoming/event";
 import { SubscribePacket } from "./packet/incoming/subscribe";
 
+import { IRepeat } from "./repeat";
+
 import { Server as WebSocketServer } from "ws";
 
 /**
@@ -70,14 +72,14 @@ export class Server {
         this.rethinkdb.watchRepeats();
         this.rethinkdb.watchConfig();
 
-        this.rethinkdb.getAllReapeats().then((data: any) => {
+        this.rethinkdb.getAllReapeats().then((data: IRepeat[]) => {
+            Logger.log("Starting repeats...");
+
             if (!data) {
                 return;
             }
 
-            Logger.log("Starting repeats...");
-
-            data.forEach((repeat: Object) => {
+            data.forEach((repeat: IRepeat) => {
                 this.repeat.addRepeat(repeat);
             });
         });
