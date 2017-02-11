@@ -267,7 +267,7 @@ export class RethinkDB extends EventEmitter {
      * 
      * @memberOf RethinkDB
      */
-    getCommandName(command: string): any{
+    getCommandName(command: string): any {
         return this.commands.filter({ id: command }).run().then((res: Object) => {
             return res;
         });
