@@ -1,7 +1,6 @@
+
 import { Server } from "./server";
 import { Redis } from "./redis";
-
-import { Active } from "./active";
 
 import {Logger } from "./logging";
 
@@ -21,8 +20,8 @@ const options = [
 ];
 
 // Set the debug mode if needed.
-const parsed = cmdLineArgs(options);
-Logger.debugMode = parsed.debug;
+const args = cmdLineArgs(options);
+Logger.debugMode = args.debug;
 
 // Check that the env is production and that the dsn has been set to enable Sentry support.
 if (config.env === "prod") {
@@ -38,9 +37,6 @@ if (config.env === "prod") {
 
 // Cretae a "Pub" connection to the Redis Server.
 const RedisPub = new Redis();
-// const active = new Active(RedisPub, 5);
-
-// TODO: Fix the active stuff.
 
 // Connect to the Redis server.
 RedisPub.connect(config)
@@ -50,6 +46,4 @@ RedisPub.connect(config)
         let server = new Server(RedisPub, config);
         // Start listening to connections.
         server.listen();
-
-        // setInterval(() => active.checkActive(), 50000);
     });

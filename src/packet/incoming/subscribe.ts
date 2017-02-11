@@ -1,11 +1,29 @@
+/**
+ * 
+ * 
+ * @export
+ * @class SubscribePacket
+ */
 export class SubscribePacket {
-    packet: any = {};
-
-    constructor(packet: Object) {
-        this.packet = packet;
+    /**
+     * Creates an instance of SubscribePacket.
+     * 
+     * @param {Object} packet
+     * 
+     * @memberOf SubscribePacket
+     */
+    constructor(private packet: any) {
+        // TODO: Use an interface here
     }
 
-    parse() {
+    /**
+     * 
+     * 
+     * @returns {string}
+     * 
+     * @memberOf SubscribePacket
+     */
+    parse(): string {
         if (!this.packet.type) {
             return "Packet type is not supplied.";
         } else if (!this.packet.channel) {

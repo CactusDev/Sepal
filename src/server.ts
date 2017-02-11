@@ -14,6 +14,11 @@ import { SubscribePacket } from "./packet/incoming/subscribe";
 
 import { Server as WebSocketServer } from "ws";
 
+/**
+ * Socket connections
+ * 
+ * @interface IConnections
+ */
 interface IConnections {
     [channel: string]: [{
         connection: any;
@@ -21,12 +26,26 @@ interface IConnections {
     }];
 }
 
+/**
+ * Websocket server
+ * 
+ * @export
+ * @class Server
+ */
 export class Server {
     socket: WebSocketServer;
     rethinkdb: RethinkDB;
     repeat: Repeat;
     clients: IConnections = {};
 
+    /**
+     * Creates an instance of Server.
+     * 
+     * @param {Redis} redis
+     * @param {IConfig} config
+     * 
+     * @memberOf Server
+     */
     constructor(public redis: Redis, public config: IConfig) {
         // Create the Database models / listeners.
         Logger.log("Connecting to Rethink...");
@@ -39,14 +58,20 @@ export class Server {
         this.repeat = new Repeat(this, this.rethinkdb);
     }
 
+    /**
+     * Listen on the given port for new socket connections
+     * 
+     * 
+     * @memberOf Server
+     */
     listen() {
         this.rethinkdb.watchCommands();
         this.rethinkdb.watchQuotes();
         this.rethinkdb.watchRepeats();
         this.rethinkdb.watchConfig();
 
-        Promise.resolve(this.rethinkdb.getAllReapeats()).then((data: any) => {
-            if (data === (null || undefined || {})) {
+        this.rethinkdb.getAllReapeats().then((data: any) => {
+            if (!data) {
                 return;
             }
 
@@ -57,8 +82,9 @@ export class Server {
             });
         });
 
-        this.socket = new WebSocketServer({ port: this.config.socket.port });
-        // Listen for connections.
+        this.socket = new WebSocketServer(this.config.socket);
+        
+        // Listen for new connections.
         this.socket.on("connection", (connection: any) => {
             connection.on("message", (message: string) => {
                 let packet: any = {};
@@ -91,8 +117,8 @@ export class Server {
                         }
                     }
                 } else if (packet.type === "event") {
-                    let raw = new IncomingEventPacket(JSON.parse(message));
-                    let error = raw.parse();
+                    const eventPacket = new IncomingEventPacket(JSON.parse(message));
+                    const error = eventPacket.parse();
 
                     if (error != null) {
                         connection.send(new ErrorPacket(error, 1004, null).parse());
@@ -106,16 +132,27 @@ export class Server {
         });
     }
 
+    /**
+     * Broadcast to the clients subscribed to the channel
+     * 
+     * @param {string} channel
+     * @param {string} action
+     * @param {string} event
+     * @param {string} service
+     * @param {*} data
+     * 
+     * @memberOf Server
+     */
     broadcastToChannel(channel: string, action: string, event: string, service: string, data: any) {
         Object.keys(this.clients).forEach((client: any) => {
             if (channel == this.clients[client][0]["channel"]) {
                 let response = new EventPacket(event, channel, action, service, data);
 
-                this.clients[client].forEach((conn: any) => {
+                this.clients[client].forEach((connection: any) => {
                     try {
-                        conn["connection"].send(JSON.stringify(response.parse()));
+                        connection["connection"].send(JSON.stringify(response.parse()));
                     } catch(e) {
-                        delete this.clients[client][conn]
+                        delete this.clients[client][connection]
                         return;
                     }
                 });

@@ -48,17 +48,44 @@ const Config = thinky.createModel("config", {
     spam: type.object()
 });
 
-interface Result {
-    "new_val": any;
-    "old_val": any;
+/**
+ * Result from the database
+ * 
+ * @interface IResult
+ */
+interface IResult {
+    new_val: any;
+    old_val: any;
 };
 
+/**
+ * Handle rethink interactions
+ * 
+ * @export
+ * @class RethinkDB
+ * @extends {EventEmitter}
+ */
 export class RethinkDB extends EventEmitter {
     // TODO: Figure out variable types for all the things
+
+    /**
+     * Creates an instance of RethinkDB.
+     * 
+     * @param {IConfig} config
+     * @param {Server} server
+     * 
+     * @memberOf RethinkDB
+     */
     constructor(public config: IConfig, public server: Server) {
         super();
     }
 
+    /**
+     * Watch the commands table
+     * 
+     * 
+     * @memberOf RethinkDB
+     */
     watchCommands() {
         Commands.changes().then((feed: any) => {
             feed.each((error: any, doc: any) => {
@@ -88,6 +115,12 @@ export class RethinkDB extends EventEmitter {
         }).error((error: any) => Logger.error(error));
     }
 
+    /**
+     * Watch the quotes tables
+     * 
+     * 
+     * @memberOf RethinkDB
+     */
     watchQuotes() {
         Quotes.changes().then((feed: any) => {
             feed.each((error: any, doc: any) => {
@@ -113,6 +146,12 @@ export class RethinkDB extends EventEmitter {
         }).error((error: any) => Logger.error(error));
     }
 
+    /**
+     * Watch the repeats table
+     * 
+     * 
+     * @memberOf RethinkDB
+     */
     watchRepeats() {
         Repeats.changes().then((feed: any) => {
             feed.each((error: any, doc: any) => {
@@ -147,6 +186,12 @@ export class RethinkDB extends EventEmitter {
         }).error((error: any) => Logger.error(error));
     }
 
+    /**
+     * Watch the config table
+     * 
+     * 
+     * @memberOf RethinkDB
+     */
     watchConfig() {
         Config.changes().then((feed: any) => {
             feed.each((error: any, doc: any) => {
@@ -172,18 +217,41 @@ export class RethinkDB extends EventEmitter {
         }).error((error: any) => Logger.error(error));
     }
 
+    /**
+     * Get all the current repeats
+     * 
+     * @returns {*}
+     * 
+     * @memberOf RethinkDB
+     */
     getAllReapeats(): any {
         return Repeats.run().then((res: any) => {
             return res;
         });
     }
 
+    /**
+     * Does a channel exist?
+     * 
+     * @param {string} channel
+     * @returns {boolean}
+     * 
+     * @memberOf RethinkDB
+     */
     channelExists(channel: string): boolean {
         return Users.filter({ token: channel }).run().then((res: Object) => {
             return res === [];
         });
     }
 
+    /**
+     * Find a command by the name
+     * 
+     * @param {string} command
+     * @returns {*}
+     * 
+     * @memberOf RethinkDB
+     */
     getCommandName(command: string): any{
         return Commands.filter({ id: command }).run().then((res: Object) => {
             return res;

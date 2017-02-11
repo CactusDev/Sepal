@@ -1,11 +1,30 @@
-export class IncomingEventPacket {
-    packet: any = {};
 
-    constructor(packet: Object) {
-        this.packet = packet;
+/**
+ * Event packet from the client
+ * 
+ * @export
+ * @class IncomingEventPacket
+ */
+export class IncomingEventPacket {
+    /**
+     * Creates an instance of IncomingEventPacket.
+     * 
+     * @param {*} packet
+     * 
+     * @memberOf IncomingEventPacket
+     */
+    constructor(private packet: any) {
+        // TODO: Convert to an interface
     }
 
-    parse() {
+    /**
+     * Parse a packet
+     * 
+     * @returns {string}
+     * 
+     * @memberOf IncomingEventPacket
+     */
+    parse(): string {
         if (!this.packet.type) {
             return "Packet type is not supplied.";
         } else if (!this.packet.event) {

@@ -1,5 +1,6 @@
 interface IConfig {
   env: string;
+
   rethinkdb: {
     host: string;
     port: number;
@@ -9,15 +10,18 @@ interface IConfig {
     db: string;
     silent?: boolean;
   };
+
   redis: {
     host: string;
     port: number;
     password: string;
     db: number;
   };
+
   sentry: {
     dsn: string;
   };
+  
   socket: {
     port: number;
   };

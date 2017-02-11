@@ -2,7 +2,11 @@
 import { Server } from "../server";
 import { RethinkDB } from "../rethinkdb";
 
-// Sidenote: Interval is in MS
+/**
+ * Current running repeats
+ * 
+ * @interface IRepeats
+ */
 interface IRepeats {
     [token: string]: {
         [command: string]: {
@@ -13,11 +17,35 @@ interface IRepeats {
     };
 };
 
+// TODO: Stop using objects for the repeat stuff. Use custom interfaces
+
+/**
+ * Handle repeating events
+ * 
+ * @export
+ * @class Repeat
+ */
 export class Repeat {
     private activeRepeats: IRepeats = {};
 
+    /**
+     * Creates an instance of Repeat.
+     * 
+     * @param {Server} server
+     * @param {RethinkDB} rethink
+     * 
+     * @memberOf Repeat
+     */
     constructor(public server: Server, public rethink: RethinkDB) { }
 
+    /**
+     * Add a new repeat
+     * 
+     * @param {Object} packet
+     * @returns {boolean}
+     * 
+     * @memberOf Repeat
+     */
     addRepeat(packet: Object): boolean {
         let repeat: any = packet;
         
@@ -31,7 +59,7 @@ export class Repeat {
 
         repeat.period = repeat.period * 1000
         
-        Promise.resolve(this.rethink.getCommandName(repeat.command)).then((data: any) => {
+        this.rethink.getCommandName(repeat.command).then((data: any) => {
             repeat.command = data[0]["name"];
         });
  
@@ -41,11 +69,17 @@ export class Repeat {
             this.activeRepeats[repeat.token][repeat.command].push({ command: repeat.command, interval: repeat.period, intervalVar: this.startRepeat(repeat) });
         }
 
-        console.log("REPEAT: ", repeat);
-
         return true;
     }
 
+    /**
+     * Remove a running repeat
+     * 
+     * @param {Object} packet
+     * @returns {boolean}
+     * 
+     * @memberOf Repeat
+     */
     removeRepeat(packet: Object): boolean {
         let data: any = packet;
 
@@ -68,6 +102,15 @@ export class Repeat {
         return true;
     }
 
+    /**
+     * Start a new repeat
+     * 
+     * @private
+     * @param {Object} packet
+     * @returns {number}
+     * 
+     * @memberOf Repeat
+     */
     private startRepeat(packet: Object): number {
         let data: any = packet;
         let intervalVar: number;
