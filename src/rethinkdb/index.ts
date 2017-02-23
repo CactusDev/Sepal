@@ -37,13 +37,13 @@ const Repeats = thinky.createModel("repeats", {
     token: type.string(),
     repeatId: type.number(),
     command: type.string(),
-    arguments: type.any()
+    commandName: type.string()
 });
 
-const Config = thinky.createModel("config", {
+const Config = thinky.createModel("configs", {
     id: type.string(),
     token: type.string(),
-    services: type.object(),
+    services: type.any(),
     announce: type.object(),
     spam: type.object()
 });
@@ -112,7 +112,7 @@ export class RethinkDB extends EventEmitter {
             });
         }).error((error: any) => Logger.error(error));
     }
-
+ 
     watchRepeats() {
         Repeats.changes().then((feed: any) => {
             feed.each((error: any, doc: any) => {
@@ -160,9 +160,10 @@ export class RethinkDB extends EventEmitter {
                 } else if (doc.getOldValue() == null) {
                     action = "created";
                 }
+                console.log(doc);
                 // Emit the event back to the server.
                 this.emit("broadcast:channel", {
-                    channel: doc.channel,
+                    channel: doc["token"],
                     action: action,
                     event: "config",
                     service: "",
@@ -184,8 +185,8 @@ export class RethinkDB extends EventEmitter {
         });
     }
 
-    getCommandName(command: string): any{
-        return Commands.filter({ id: command }).run().then((res: Object) => {
+    getCommand(command: string): any {
+        return Commands.filter({ name: command  }).run().then((res: Object) => {
             return res;
         });
     }

@@ -23,7 +23,8 @@
     "thinky": "^2.3.7",
     "tslint": "^3.7.3",
     "utf-8-validate": "^1.2.1",
-    "ws": "^1.1.1"
+    "ws": "^1.1.1",
+    "typescript": "2.2.1"
   },
   "devDependencies": {
     "@types/bluebird": "^3.0.35",
