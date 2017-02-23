@@ -13,11 +13,10 @@ const Commands = thinky.createModel("commands", {
     id: type.string(),
     name: type.string(),
     response: type.object(),
-    createdAt: type.string(),
     token: type.string(),
     userLevel: type.number(),
     enabled: type.boolean(),
-    arguments: type.object()
+    arguments: type.any(),
 });
 
 const Quotes = thinky.createModel("quotes", {
@@ -113,7 +112,7 @@ export class RethinkDB extends EventEmitter {
             });
         }).error((error: any) => Logger.error(error));
     }
-
+ 
     watchRepeats() {
         Repeats.changes().then((feed: any) => {
             feed.each((error: any, doc: any) => {
