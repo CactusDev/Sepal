@@ -50,49 +50,48 @@ export class RethinkDB extends EventEmitter {
     }
 
     connect() {
-        this.rethink = new Thinky(config.rethinkdb).then(() => {
-            // This is gross
-            const type = Thinky.type;
+        this.rethink = new Thinky(config.rethinkdb)
+        // This is gross
+        const type = Thinky.type;
 
-            this.commands = Thinky.createModel("commands", {
-                id: type.string(),
-                name: type.string(),
-                response: type.object(),
-                token: type.string(),
-                userLevel: type.number(),
-                enabled: type.boolean(),
-                arguments: type.any(),
-            });
+        this.commands = Thinky.createModel("commands", {
+            id: type.string(),
+            name: type.string(),
+            response: type.object(),
+            token: type.string(),
+            userLevel: type.number(),
+            enabled: type.boolean(),
+            arguments: type.any(),
+        });
 
-            this.quotes = Thinky.createModel("quotes", {
-                id: type.string(),
-                quoteId: type.number(),
-                quote: type.string(),
-                token: type.string()
-            });
+        this.quotes = Thinky.createModel("quotes", {
+            id: type.string(),
+            quoteId: type.number(),
+            quote: type.string(),
+            token: type.string()
+        });
 
-            this.users = Thinky.createModel("users", {
-                id: type.string(),
-                username: type.string()
-            });
+        this.users = Thinky.createModel("users", {
+            id: type.string(),
+            username: type.string()
+        });
 
-            this.repeats = Thinky.createModel("repeats", {
-                id: type.string(),
-                period: type.number(),
-                token: type.string(),
-                repeatId: type.number(),
-                command: type.string(),
-                arguments: type.any()
-            });
+        this.repeats = Thinky.createModel("repeats", {
+            id: type.string(),
+            period: type.number(),
+            token: type.string(),
+            repeatId: type.number(),
+            command: type.string(),
+            arguments: type.any()
+        });
 
-            this.config = Thinky.createModel("config", {
-                id: type.string(),
-                token: type.string(),
-                services: type.object(),
-                announce: type.object(),
-                spam: type.object()
-            });
-        }).catch((reason: string) => Logger.error(reason));
+        this.config = Thinky.createModel("config", {
+            id: type.string(),
+            token: type.string(),
+            services: type.object(),
+            announce: type.object(),
+            spam: type.object()
+        });
     }
 
     /**
