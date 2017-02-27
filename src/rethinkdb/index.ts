@@ -50,11 +50,11 @@ export class RethinkDB extends EventEmitter {
     }
 
     connect() {
-        this.rethink = new Thinky(config.rethinkdb)
+        this.rethink = new Thinky(config.rethinkdb);
         // This is gross
         const type = Thinky.type;
 
-        this.commands = Thinky.createModel("commands", {
+        this.commands = this.rethink.createModel("commands", {
             id: type.string(),
             name: type.string(),
             response: type.object(),
@@ -64,19 +64,19 @@ export class RethinkDB extends EventEmitter {
             arguments: type.any(),
         });
 
-        this.quotes = Thinky.createModel("quotes", {
+        this.quotes = this.rethink.createModel("quotes", {
             id: type.string(),
             quoteId: type.number(),
             quote: type.string(),
             token: type.string()
         });
 
-        this.users = Thinky.createModel("users", {
+        this.users = this.rethink.createModel("users", {
             id: type.string(),
             username: type.string()
         });
 
-        this.repeats = Thinky.createModel("repeats", {
+        this.repeats = this.rethink.createModel("repeats", {
             id: type.string(),
             period: type.number(),
             token: type.string(),
@@ -85,7 +85,7 @@ export class RethinkDB extends EventEmitter {
             arguments: type.any()
         });
 
-        this.config = Thinky.createModel("config", {
+        this.config = this.rethink.createModel("config", {
             id: type.string(),
             token: type.string(),
             services: type.object(),
