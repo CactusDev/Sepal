@@ -85,7 +85,7 @@ export class RethinkDB extends EventEmitter {
             arguments: type.any()
         });
 
-        this.config = this.rethink.createModel("config", {
+        this.userConfig = this.rethink.createModel("config", {
             id: type.string(),
             token: type.string(),
             services: type.object(),
