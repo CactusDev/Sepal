@@ -67,6 +67,8 @@ export class Server {
      * @memberOf Server
      */
     listen() {
+        this.rethinkdb.connect();
+
         this.rethinkdb.watchCommands();
         this.rethinkdb.watchQuotes();
         this.rethinkdb.watchRepeats();
@@ -85,7 +87,7 @@ export class Server {
         });
 
         this.socket = new WebSocketServer(this.config.socket);
-        
+
         // Listen for new connections.
         this.socket.on("connection", (connection: any) => {
             connection.on("message", (message: string) => {
