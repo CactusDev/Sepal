@@ -109,7 +109,7 @@ export class RethinkDB extends EventEmitter {
                 }
                 let action: "deleted" | "created" | "updated" = "updated";
 
-                if (doc === (null || undefined)) {    
+                if (doc === (null || undefined)) {
                     return;
                 }
 
@@ -121,7 +121,7 @@ export class RethinkDB extends EventEmitter {
                 // Emit the event back to the server.
                 this.emit("broadcast:channel", {
                     channel: doc.channel,
-                    action: "deleted",
+                    action: action,
                     event: "command",
                     service: "",
                     data: doc
