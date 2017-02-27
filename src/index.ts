@@ -2,7 +2,7 @@
 import { Server } from "./server";
 import { Redis } from "./redis";
 
-import {Logger } from "./logging";
+import { Logger } from "./logging";
 
 const cmdLineArgs = require("command-line-args");
 const raven = require("raven");
