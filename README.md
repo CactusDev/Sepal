@@ -1,14 +1,14 @@
 # Sepal
 
+Sepal is the backend service that sends packets when the database updates
+so the bot can update dynamic values, like the spam config.
+
 ## What is this?
 
 This is our system for sending alerts to all our services to provide real-time updates to information displayed.
 
 
 ## Setup:
-
-Sepal is the backend service that sends packets when the database updates
-so the bot can update dynamic values, like the spam config.
 
 ## Pre-Install
 
