@@ -18,15 +18,28 @@ export class Repeat {
 
     addRepeat(packet: Object) {
         let repeat: any = packet;
-        if (this.activeRepeats[repeat.token] === (null || undefined)) {
-            this.activeRepeats[repeat.token] = [];
+
+        if (!repeat.token || !repeat.commandName || !repeat.period) {
+            return;
         }
 
-        repeat.period = repeat.period * 1000
-        repeat.timeout = this.startRepeat(repeat);
-        repeat.response = data[0]["response"];
+        Promise.resolve(this.rethink.getCommand(repeat.commandName)).then((data: any) => {
+            if (data.length == 0) {
+		return;
+            }
 
-        this.activeRepeats[repeat.token][repeat.commandName] = repeat;
+            if (this.activeRepeats[repeat.token] === (null || undefined)) {
+                this.activeRepeats[repeat.token] = [];
+            }
+
+            console.log(data);
+
+            repeat.period = repeat.period * 1000
+            repeat.timeout = this.startRepeat(repeat);
+            repeat.response = data[0]["response"];
+
+            this.activeRepeats[repeat.token][repeat.commandName] = repeat;
+        });
     }
 
     removeRepeat(packet: Object) {
@@ -45,4 +58,3 @@ export class Repeat {
         }, data.period);
     }
 }
-
