@@ -1,9 +1,13 @@
 const colors = require("colors/safe");
 
-// Should this be documented?
+/**
+ * Log pretty things
+ * 
+ * @export
+ * @class Logger
+ */
 export class Logger {
     public static raven: any;
-    // TODO: Move raven stuff to it's own thing
     public static debugMode: boolean = false;
 
     public static log(message: string) {

@@ -1,5 +1,5 @@
 /**
- * 
+ * Event subscription packet
  * 
  * @export
  * @class SubscribePacket
@@ -13,7 +13,7 @@ export class SubscribePacket {
      * @memberOf SubscribePacket
      */
     constructor(private packet: any) {
-        // TODO: Use an interface here
+
     }
 
     /**

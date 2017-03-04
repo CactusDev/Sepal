@@ -17,6 +17,12 @@ interface IRepeats {
     };
 };
 
+/**
+ * Repeat object
+ * 
+ * @export
+ * @interface IRepeat
+ */
 export interface IRepeat {
     token: string;
     command: string;
@@ -44,18 +50,18 @@ export class Repeat {
     constructor(public server: Server, public rethink: RethinkDB) { }
 
     /**
-     * Add a new repeat
+     * Creates a new repeat.
      * 
-     * @param {IRepeat} repeat
-     * @returns {boolean}
+     * @param {IRepeat} repeat 
+     * @returns 
      * 
      * @memberOf Repeat
      */
-    addRepeat(repeat: IRepeat): boolean {
+    addRepeat(repeat: IRepeat) {
         if (!this.activeRepeats[repeat.token]) {
             this.activeRepeats[repeat.token] = {};
         }
-        
+
         this.rethink.getCommandName(repeat.command).then((data: any) => {
             repeat.command = data[0]["name"];
         });
@@ -64,8 +70,8 @@ export class Repeat {
             command: repeat.command,
             interval: repeat.period * 1000,
             intervalVar: this.startRepeat(repeat)
-        }
- 
+        };
+
         if (!this.activeRepeats[repeat.token][repeat.command]) {
             this.activeRepeats[repeat.token][repeat.command] = [repeating];
         } else {
@@ -76,14 +82,14 @@ export class Repeat {
     }
 
     /**
-     * Remove a running repeat
+     * Removes a repeat
      * 
-     * @param {IRepeat} repeat
-     * @returns {boolean}
+     * @param {IRepeat} repeat 
+     * @returns 
      * 
      * @memberOf Repeat
      */
-    removeRepeat(repeat: IRepeat): boolean {
+    removeRepeat(repeat: IRepeat) {
         if (!repeat.channel || !repeat.command || !repeat.period) {
             return false;
         }
@@ -94,7 +100,7 @@ export class Repeat {
 
         if (this.activeRepeats[repeat.channel][repeat.command] == null) {
             return false;
-        }        
+        }
 
         this.activeRepeats[repeat.channel][repeat.command] = null;
 
@@ -117,6 +123,6 @@ export class Repeat {
             this.server.broadcastToChannel(repeat.token, null, "repeat", null, repeat);
         }, repeat.period);
 
-        return intervalVar
+        return intervalVar;
     }
 }

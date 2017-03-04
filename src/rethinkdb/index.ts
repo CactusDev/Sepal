@@ -1,13 +1,10 @@
+
 import { EventEmitter } from "events";
-
 import { Server } from "../server";
-
 import { Logger } from "../logging";
-
 import { IRepeat } from "../repeat";
 
 const config: IConfig = require("../configs/development");
-
 const Thinky = require("thinky");
 
 /**

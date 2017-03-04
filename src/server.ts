@@ -1,8 +1,7 @@
+
 import { RethinkDB } from "./rethinkdb";
 import { Redis } from "./redis";
-
 import { Repeat } from "./repeat";
-
 import { Logger } from "./logging";
 
 import { ErrorPacket } from "./packet/error";
@@ -13,7 +12,6 @@ import { IncomingEventPacket } from "./packet/incoming/event";
 import { SubscribePacket } from "./packet/incoming/subscribe";
 
 import { IRepeat } from "./repeat";
-
 import { Server as WebSocketServer } from "ws";
 
 /**
@@ -113,7 +111,7 @@ export class Server {
                         return;
                     } else {
                         connection.send(new SuccessPacket(`Subscribed to events in ${packet.channel}`, "subscribe").parse());
-                        
+
                         if (this.clients[packet.channel] === (null || undefined)) {
                             this.clients[packet.channel] = [{ "connection": connection, "channel": packet.channel }];
                         } else {
@@ -149,13 +147,13 @@ export class Server {
      */
     broadcastToChannel(channel: string, action: string, event: string, service: string, data: any) {
         Object.keys(this.clients).forEach((client: any) => {
-            if (channel == this.clients[client][0]["channel"]) {
+            if (channel === this.clients[client][0]["channel"]) {
                 let response = new EventPacket(event, channel, action, service, data);
 
                 this.clients[client].forEach((connection: any) => {
                     try {
                         connection["connection"].send(JSON.stringify(response.parse()));
-                    } catch(e) {
+                    } catch (e) {
                         delete this.clients[client][connection]
                         return;
                     }

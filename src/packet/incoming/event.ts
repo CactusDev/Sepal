@@ -14,7 +14,7 @@ export class IncomingEventPacket {
      * @memberOf IncomingEventPacket
      */
     constructor(private packet: any) {
-        // TODO: Convert to an interface
+
     }
 
     /**

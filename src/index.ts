@@ -33,7 +33,7 @@ if (config.env === "prod") {
         Logger.raven = client;
         Logger.log("Sentry initialized...");
     } else {
-        Logger.log("UNABLE TO USE SENTRY! SEPAL RUNNING IN PROD MODE! THIS IS DANGEROUS");
+        Logger.warning("UNABLE TO USE SENTRY! SEPAL RUNNING IN PROD MODE! THIS IS DANGEROUS");
     }
 }
 
@@ -45,7 +45,7 @@ RedisPub.connect(config)
     .then(() => {
         Logger.log("Connected to the Redis server.");
         // Create the server.
-        let server = new Server(RedisPub, config);
+        const server = new Server(RedisPub, config);
         // Start listening to connections.
         server.listen();
     });

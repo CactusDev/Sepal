@@ -1,3 +1,9 @@
+
+/**
+ * Config object
+ * 
+ * @interface IConfig
+ */
 interface IConfig {
   env: string;
 
@@ -27,6 +33,11 @@ interface IConfig {
   };
 }
 
+/**
+ * Channel event that's emitted
+ * 
+ * @interface IChannelEvent
+ */
 interface IChannelEvent {
   token: string;
   action: string;
