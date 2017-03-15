@@ -19,5 +19,6 @@ interface IConfig {
     };
     sentry: {
         dsn: string;
+        enabled: boolean;
     };
 }

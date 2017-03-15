@@ -1,11 +1,7 @@
 
-import Logger from "./logger";
+import Config from "./configs/config";
 
-Logger.log("Testing!");
-Logger.log({a: "Testing!"});
-Logger.warning("Testing!");
-Logger.warning({a: "Testing!"});
-Logger.error("Testing!");
-Logger.error({a: "Testing!"});
-Logger.debug("Testing!");
-Logger.debug({a: "Testing!"});
+import { Rethink } from "./rethink";
+
+const rethink: Rethink = new Rethink(Config);
+rethink.connect();
