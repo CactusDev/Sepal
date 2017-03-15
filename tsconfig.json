@@ -7,16 +7,20 @@
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": true,
-    "outDir": "dist",
-    "rootDir": "src",
+    "outDir": "js",
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "typeRoots": [
+      "node_modules/@types"
+    ],"types": [
+      "node"
+    ]
   },
   "include": [
-    "./src/**/*",
-    "./test"
+    "./src/**/*"
   ],
   "exclude": [
+    "js",
     "node_modules"
   ]
 }

@@ -1,11 +1,12 @@
 
 import "reflect-metadata";
 
-import { RethinkConnection } from "rethinkts";
-import { EventEmitter } from "events";
+import { RethinkConnection, Model } from "rethinkts";
 
 import Logger from "../logger";
 import { Alias, Command, Config, Quote, Repeat, Social, Trust } from "./models";
+
+import { Observable } from "rxjs/Observable";
 
 /**
  * Handle rethink interactions
@@ -14,7 +15,6 @@ import { Alias, Command, Config, Quote, Repeat, Social, Trust } from "./models";
  * @class Rethink
  */
 export class Rethink {
-
     private rethink: RethinkConnection;
 
     /**
@@ -23,7 +23,6 @@ export class Rethink {
      * @memberOf Rethink
      */
     constructor(private config: IConfig) {
-
     }
 
     /**
@@ -46,6 +45,17 @@ export class Rethink {
         this.rethink.registerModel(Repeat);
         this.rethink.registerModel(Social);
         this.rethink.registerModel(Trust);
+
+        const keys = Object.keys(this.rethink.models);
+        for (let i = 0, length = keys.length; i < length; i++) {
+            const model = this.rethink.models[keys[i]];
+            model.changes().then((changes) => {
+                changes.each((error, cursor) => {
+                    console.log(keys[i], cursor);
+                });
+            });
+        }
+
         Logger.log("Registered models!");
     }
 }

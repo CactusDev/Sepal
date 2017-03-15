@@ -9,7 +9,7 @@ export class Command extends Model {
     public name: string;
 
     @Field()
-    public response: Object;
+    public response: Object[];
 
     @Field()
     public createdAt: any; // TODO: Find datetime thing
