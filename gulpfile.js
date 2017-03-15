@@ -1,9 +1,21 @@
-var gulp = require("gulp");
-var ts = require("gulp-typescript");
-var merge = require("merge2");
-var project = ts.createProject("tsconfig.json", { noImplicitAny: true });
+const gulp = require("gulp");
+const ts = require("gulp-typescript");
+const uglify = require("gulp-uglify");
+const pump = require("pump");
 
-gulp.task("default", () => {
-    var result = project.src().pipe(project());
+const project = ts.createProject("tsconfig.json");
+
+gulp.task("build", () => {
+    const result = project.src().pipe(project());
     return result.js.pipe(gulp.dest("dist"))
 });
+
+gulp.task("compress", () => {
+    // pump([
+    //     gulp.src("lib/*js"),
+    //     uglify(),
+    //     gulp.dest("dist/")
+    // ])
+});
+
+gulp.task("default", ["build", "compress"]);
