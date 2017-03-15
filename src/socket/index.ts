@@ -1,5 +1,5 @@
 
-import { Server, createServer, IServerOptions } from "ws";
+import { Server, IServerOptions } from "ws";
 import Logger from "../logger";
 
 /**
@@ -26,19 +26,27 @@ export class SepalSocket {
      *
      * @memberOf SepalSocket
      */
-    public create() {
-        const options: IServerOptions = {
-            port: this.config.socket.port
-        };
-        this.socket = createServer(options);
+    public async create(): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            const options: IServerOptions = {
+                port: this.config.socket.port
+            };
 
-        this.socket.on("error", (error: Error) => {
-            Logger.error(error);
-        });
+            this.socket = new Server(options);
 
-        this.socket.on("connection", (connection) => {
-            connection.on("message", (message: any) => {
-                Logger.log(typeof(message));
+            this.socket.on("error", (error: Error) => {
+                Logger.error(error);
+            });
+
+            this.socket.once("listening", () => {
+                Logger.log(`Listening on port: ${options.port}`);
+                resolve();
+            });
+
+            this.socket.on("connection", (connection) => {
+                connection.on("message", (message: any) => {
+                    console.log(message);
+                });
             });
         });
     }
