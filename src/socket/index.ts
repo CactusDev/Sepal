@@ -91,7 +91,7 @@ export class SepalSocket {
         };
 
         rethink.on("broadcast:channel", (data: any) => {
-            this.sendToChannel(data["data"]["channel"], data["data"]);
+            this.sendToChannel(data["data"]["new_val"]["token"], data["event"], data["data"]["new_val"]);
         });
     }
 
@@ -177,17 +177,30 @@ export class SepalSocket {
     /**
      * Send JSON data to a channel's subscribed clients
      * 
-     * @param {string} channel 
-     * @param {Object} data 
-     * @returns {Promise<any>} 
+     * @param {string} channel The channel the event happened in
+     * @param {Object} data The changed values
+     * @returns {Promise<any>}
      * 
      * @memberOf SepalSocket
      */
-    public async sendToChannel(channel: string, data: Object): Promise<any> {
+    public async sendToChannel(channel: string, event: string, data: any): Promise<any> {
         let position = 0;
+        if (this.clients[channel] === undefined) {
+            return;
+        }
+
+        delete data["id"];
+
+        const packet = {
+            type: "event",
+            event: event,
+            channel: data["token"],
+            data: data
+        };
+
         this.clients[channel].forEach((client: WebSocket) => {
             try {
-                client.send(JSON.stringify(data));
+                client.send(JSON.stringify(packet));
             } catch (e) {
                 delete this.clients[channel][position];
             }
