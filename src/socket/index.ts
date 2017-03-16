@@ -3,10 +3,25 @@ import { Server, IServerOptions } from "ws";
 import Logger from "../logger";
 import { PacketParser } from "../packets/packet";
 
-import { JoinPacketParser, ErrorBuilder } from "../packets";
+import { JoinPacketParser, ErrorBuilder, JoinedBuilder } from "../packets";
+import { Rethink } from "../rethink";
 
+/**
+ * Types of packets to the parsers that handle them
+ * 
+ * @interface PacketParsers
+ */
 interface PacketParsers {
     [type: string]: PacketParser;
+}
+
+/**
+ * Stores the clients for each channel
+ * 
+ * @interface ChannelClients
+ */
+interface ChannelClients {
+    [channel: string]: any[];
 }
 
 /**
@@ -35,19 +50,49 @@ export class SepalSocket {
      */
     private parsers: PacketParsers;
 
+    /**
+     * Build custom JSON errors
+     * 
+     * @private
+     * @type {ErrorBuilder}
+     * @memberOf SepalSocket
+     */
     private errorBuilder: ErrorBuilder;
+
+    /**
+     * Build channel joined packets
+     * 
+     * @private
+     * @type {JoinedBuilder}
+     * @memberOf SepalSocket
+     */
+    private joinedBuilder: JoinedBuilder;
+
+    /**
+     * Connected clients who have joined a channel
+     * 
+     * @private
+     * @type {ChannelClients[]}
+     * @memberOf SepalSocket
+     */
+    private clients: ChannelClients = {};
 
     /**
      * Creates an instance of SepalSocket.
      *
      * @memberOf SepalSocket
      */
-    public constructor(private config: IConfig) {
+    public constructor(private config: IConfig, private rethink: Rethink) {
         this.errorBuilder = new ErrorBuilder();
+        this.joinedBuilder = new JoinedBuilder();
 
         this.parsers = {
             join: new JoinPacketParser()
         };
+
+        rethink.on("broadcast:channel", (data: any) => {
+            this.sendToChannel(data["data"]["channel"], data["data"]);
+        });
     }
 
     /**
@@ -96,19 +141,28 @@ export class SepalSocket {
                     return;
                 }
 
-                if (!((packet as any).data as Object).hasOwnProperty("channel")) {  // Don't let Art see this
+                if (!((packet as any).data as Object).hasOwnProperty("channel")) {  // Don't let Art see this (or me for that matter)
                     this.errorBuilder.create("packet didn't contain a channel!", 1003).then((error: string) => {
                         connection.send(error);
                     });
                     return;
                 }
-
                 Logger.debug(packet);
 
                 const packetData = packet as any;
                 if (packetData.type in this.parsers) {
                     this.parsers[packetData.type].parse(packetData.data).then((parsed) => {
-                        console.log(typeof(parsed));
+                        if (packetData.type === "join") {
+                            if (this.clients[parsed.channel] === undefined) {
+                                this.clients[parsed.channel] = [connection];
+                            } else {
+                                this.clients[parsed.channel].push(connection);
+                            }
+
+                            this.joinedBuilder.create(parsed.channel, true).then((joinedPacket: string) => {
+                                connection.send(joinedPacket);
+                            });
+                        }
                     });
                 } else {
                     this.errorBuilder.create("packet type is invalid!", 1004).then((error: string) => {
@@ -117,6 +171,27 @@ export class SepalSocket {
                     return;
                 }
             });
+        });
+    }
+
+    /**
+     * Send JSON data to a channel's subscribed clients
+     * 
+     * @param {string} channel 
+     * @param {Object} data 
+     * @returns {Promise<any>} 
+     * 
+     * @memberOf SepalSocket
+     */
+    public async sendToChannel(channel: string, data: Object): Promise<any> {
+        let position = 0;
+        this.clients[channel].forEach((client: WebSocket) => {
+            try {
+                client.send(JSON.stringify(data));
+            } catch (e) {
+                delete this.clients[channel][position];
+            }
+            position++;
         });
     }
 }

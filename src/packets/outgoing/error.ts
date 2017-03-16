@@ -1,6 +1,4 @@
 
-import { BasePacket } from "../packet";
-
 /**
  * Outgoing error packet
  * 
@@ -10,6 +8,7 @@ import { BasePacket } from "../packet";
 export interface ErrorPacket {
     message: string;
     code: number;
+    channel?: string;
 }
 
 /**
@@ -21,7 +20,7 @@ export interface ErrorPacket {
 export class ErrorBuilder {
 
     /**
-     * Create a new error packet from the input
+     * Create a new error packet
      * 
      * @param {string} message 
      * @param {number} code 
@@ -29,15 +28,18 @@ export class ErrorBuilder {
      * 
      * @memberOf ErrorBuilder
      */
-    public async create(message: string, code: number): Promise<string> {
+    public async create(message: string, code: number, channel?: string): Promise<string> {
         const error: ErrorPacket = {
             message: message,
             code: code
         };
 
+        if (channel) {
+            error.channel = channel;
+        }
+
         return JSON.stringify({
             type: "error",
-            channel: "", // TODO: Get the channel somehow
             data: error
         });
     }

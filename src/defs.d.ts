@@ -22,3 +22,8 @@ interface IConfig {
         enabled: boolean;
     };
 }
+
+interface IChannelEvent {
+    event: string;
+    data: any;
+}

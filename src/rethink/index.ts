@@ -1,7 +1,9 @@
 
 import "reflect-metadata";
 
-import { RethinkConnection, Model } from "rethinkts";
+import { RethinkConnection } from "rethinkts";
+
+import { EventEmitter } from "events";
 
 import Logger from "../logger";
 import { Alias, Command, Config, Quote, Repeat, Social, Trust } from "./models";
@@ -12,7 +14,7 @@ import { Alias, Command, Config, Quote, Repeat, Social, Trust } from "./models";
  * @export
  * @class Rethink
  */
-export class Rethink {
+export class Rethink extends EventEmitter {
     private rethink: RethinkConnection;
 
     /**
@@ -21,6 +23,7 @@ export class Rethink {
      * @memberOf Rethink
      */
     constructor(private config: IConfig) {
+        super();
     }
 
     /**
@@ -29,7 +32,7 @@ export class Rethink {
      *
      * @memberOf Rethink
      */
-    connect(): Promise<any> {
+    public async connect(): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             Logger.log("Connecting to Rethink...");
             this.rethink = new RethinkConnection(this.config.rethink.connection);
@@ -50,7 +53,7 @@ export class Rethink {
                 const model = this.rethink.models[keys[i]];
                 model.changes().then((changes) => {
                     changes.each((error, cursor) => {
-                        console.log(keys[i], cursor); // TODO: emit stuff
+                        this.emit("broadcast:channel", {event: keys[i], data: cursor});
                     });
                 });
             }
