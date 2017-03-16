@@ -198,6 +198,11 @@ export class SepalSocket {
             data: data
         };
 
+        if (event === "config") {
+            delete data["services"];
+            delete data["permissions"];
+        }
+
         this.clients[channel].forEach((client: WebSocket) => {
             try {
                 client.send(JSON.stringify(packet));

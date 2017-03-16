@@ -51,6 +51,7 @@ export class Rethink extends EventEmitter {
             const keys = Object.keys(this.rethink.models);
             for (let i = 0, length = keys.length; i < length; i++) {
                 const model = this.rethink.models[keys[i]];
+
                 model.changes().then((changes) => {
                     changes.each((error, cursor) => {
                         this.emit("broadcast:channel", {event: keys[i], data: cursor});
