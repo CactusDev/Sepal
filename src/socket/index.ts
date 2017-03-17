@@ -82,7 +82,7 @@ export class SepalSocket {
      *
      * @memberOf SepalSocket
      */
-    public constructor(private config: IConfig, private rethink: Rethink) {
+    public constructor(private config: IConfig, public rethink: Rethink) {
         this.errorBuilder = new ErrorBuilder();
         this.joinedBuilder = new JoinedBuilder();
 

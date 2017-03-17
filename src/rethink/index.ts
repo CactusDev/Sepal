@@ -1,7 +1,7 @@
 
 import "reflect-metadata";
 
-import { RethinkConnection } from "rethinkts";
+import { RethinkConnection, DocumentCursor, Model } from "rethinkts";
 
 import { EventEmitter } from "events";
 
@@ -54,7 +54,30 @@ export class Rethink extends EventEmitter {
 
                 model.changes().then((changes) => {
                     changes.each((error, cursor) => {
-                        this.emit("broadcast:channel", {event: keys[i], data: cursor});
+                        this.modelStatus(cursor).then((state: string) => {
+                            if (keys[i] === "repeat") {
+                                if (state === "new") {
+                                    const data: any = cursor["new_val"];
+                                    this.emit("repeat:start", {
+                                        command: data.commandName,
+                                        period: data.period,
+                                        channel: data.token
+                                    });
+                                } else {
+                                    const data: any = cursor["old_val"] || cursor["new_val"];
+                                    this.emit("repeat:stop", {
+                                        command: data.commandName,
+                                        period: data.period,
+                                        channel: data.token
+                                    });
+                                }
+                            } else {
+                                this.emit("broadcast:channel", {
+                                    event: keys[i],
+                                    data: cursor
+                                });
+                            }
+                        });
                     });
                 });
             }
@@ -62,5 +85,51 @@ export class Rethink extends EventEmitter {
             Logger.log("Registered models!");
             resolve();
         });
+    }
+
+    /**
+     * Get all repeats in the database
+     * 
+     * @returns {Promise<any>} 
+     * 
+     * @memberOf Rethink
+     */
+    public async getAllRepeats(): Promise<any> {
+        return this.rethink.models["repeat"].all().then((res: any[]) => {
+            return res;
+        });
+    }
+
+    /**
+     * Get the response of a command from the name given
+     * 
+     * @param {string} commandName 
+     * @returns {Promise<any>} 
+     * 
+     * @memberOf Rethink
+     */
+    public async getCommand(commandName: string): Promise<any> {
+        return this.rethink.models["command"].find({ name: commandName }).then((res: any[]) => {
+            return res;
+        });
+    }
+
+    /**
+     * Get the status of a model in string form
+     * 
+     * @private
+     * @param {DocumentCursor<Model>} model 
+     * @returns {Promise<string>} 
+     * 
+     * @memberOf Rethink
+     */
+    private async modelStatus(model: DocumentCursor<Model>): Promise<string> {
+        if (model.new_val !== null && model.old_val === null) {
+            return "new";
+        } else if (model.new_val !== null && model.old_val !== null) {
+            return "changed";
+        } else {
+            return "deleted";
+        }
     }
 }
