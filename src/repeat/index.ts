@@ -1,4 +1,3 @@
-
 import { SepalSocket } from "../socket";
 import { Rethink } from "../rethink";
 import Logger from "../logger";
