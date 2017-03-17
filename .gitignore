@@ -1,9 +1,9 @@
-config.ts
 npm-debug.log
 node_modules/
 yarn.lock
-dist/
+js/
 release/
 typings/
+lib/
 
-src/configs/development.ts
+src/configs/config.ts

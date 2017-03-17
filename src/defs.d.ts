@@ -1,32 +1,29 @@
+
 interface IConfig {
-  env: string;
-  rethinkdb: {
-    host: string;
-    port: number;
-    user: string;
-    authKey?: string;
-    password: string;
-    db: string;
-    silent?: boolean;
-  };
-  redis: {
-    host: string;
-    port: number;
-    password: string;
-    db: number;
-  };
-  sentry: {
-    dsn: string;
-  };
-  socket: {
-    port: number;
-  };
+    socket: {
+        port: number;
+    };
+    rethink: {
+        connection: {
+            host: string;
+            user: string;
+            password: string;
+        }
+        db: string;
+    };
+    redis: {
+        host: string;
+        port: number;
+        password: string;
+        db: number;
+    };
+    sentry: {
+        dsn: string;
+        enabled: boolean;
+    };
 }
 
 interface IChannelEvent {
-  token: string;
-  action: string;
-  event: string;
-  service: string;
-  data: any;
+    event: string;
+    data: any;
 }
