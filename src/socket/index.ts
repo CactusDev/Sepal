@@ -230,7 +230,6 @@ export class SepalSocket {
         const keys = Object.keys(this.clients);
         keys.forEach((channel: string) => {
             this.clients[channel].forEach((client: WebSocket) => {
-                console.log(channel);
                 try {
                     client.send(JSON.stringify(packet));
                 } catch (e) {
