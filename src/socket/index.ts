@@ -113,6 +113,10 @@ export class SepalSocket {
 
         this.socket.once("listening", () => {
             Logger.log(`Listening on port: ${options.port}`);
+
+            setInterval(() => {
+                this.broadcast({type: "living"});
+            }, 60000);
         });
 
         this.socket.on("connection", (connection) => {
@@ -210,6 +214,31 @@ export class SepalSocket {
                 delete this.clients[channel][position];
             }
             position++;
+        });
+    }
+
+    /**
+     * Broadcast to all connected clients
+     * 
+     * @private
+     * @param {*} packet 
+     * 
+     * @memberOf SepalSocket
+     */
+    private async broadcast(packet: any) {
+        let position = 0;
+
+        const keys = Object.keys(this.clients);
+        keys.forEach((channel: string) => {
+            this.clients[channel].forEach((client: WebSocket) => {
+                console.log(channel);
+                try {
+                    client.send(JSON.stringify(packet));
+                } catch (e) {
+                    delete this.clients[channel][position];
+                }
+                position++;
+            });
         });
     }
 }
