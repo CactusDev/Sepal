@@ -14,7 +14,7 @@ interface IConfig {
     redis: {
         db: string;
         host: string;
-        port: number;
+        // port: number;
         password: string;
     };
     sentry: {

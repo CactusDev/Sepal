@@ -209,6 +209,7 @@ export class SepalSocket {
         this.clients[channel].forEach((client: WebSocket) => {
             try {
                 client.send(JSON.stringify(packet));
+                console.log("Packet", packet);
             } catch (e) {
                 delete this.clients[channel][position];
             }
