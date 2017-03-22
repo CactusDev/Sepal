@@ -108,10 +108,8 @@ export class Rethink extends EventEmitter {
      * 
      * @memberOf Rethink
      */
-    public async getCommand(commandName: string): Promise<any> {
-        return this.rethink.models["command"].find({ name: commandName }).then((res: any[]) => {
-            return res;
-        });
+    public async getCommand(name: string, channel: string): Promise<Command> {
+        return await Command.findOne<Command>({ name, channel });
     }
 
     /**

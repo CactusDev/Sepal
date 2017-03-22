@@ -94,7 +94,7 @@ export class RepeatHandler {
      */
     private async startRepeat(repeat: Repeat) {
         repeat.period = repeat.period * 1000;
-        this.rethink.getCommand(repeat.command).then((response: any) => {
+        this.rethink.getCommand(repeat.command, repeat.channel).then((response: any) => {
             const interval = setInterval(() => {
                 this.socket.sendToChannel(repeat.channel, "repeat", {response: {message: response[0]["response"]}});
             }, repeat.period);
@@ -171,7 +171,7 @@ export class RepeatHandler {
         const repeats: any[] = await this.rethink.getAllRepeats();
 
         repeats.forEach((databaseRepeat: any) => {
-            this.rethink.getCommand(databaseRepeat.commandName).then((response: any) => {
+            this.rethink.getCommand(databaseRepeat.commandName, databaseRepeat.channel).then((response: any) => {
                 let repeat: RepeatResponse = {
                     channel: databaseRepeat.token,
                     command: databaseRepeat.commandName,
