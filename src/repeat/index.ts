@@ -1,56 +1,47 @@
+
 import { SepalSocket } from "../socket";
 import { Rethink } from "../rethink";
-import Logger from "../logger";
+import { Logger } from "../logger";
 
 /**
- * Repeat object
+ * Running repeat
  * 
  * @export
  * @interface Repeat
  */
-export interface Repeat {
+export interface IRepeat {
     command: string;
     period: number;
     channel: string;
+    interval?: NodeJS.Timer;
 }
 
 /**
- * Currently running repeat
- * 
- * @interface RunningRepeat
- * @extends {Repeat}
- */
-interface RunningRepeat extends Repeat {
-    interval: any;
-}
-
-/**
- * The command response of a repeat
+ * Command response of a repeat
  * 
  * @interface RepeatResponse
- * @extends {Repeat}
  */
-interface RepeatResponse extends Repeat {
-    response: any;
+interface IRepeatResponse {
+    response: Object[];
 }
 
 /**
- * Running repeats for a channel
+ * Running repeats in a channel
  * 
- * @interface IRepeats
+ * @interface IRunningRepeats
  */
-interface IRepeats {
-    [channel: string]: RunningRepeat[];
+interface IRunningRepeats {
+    [channel: string]: IRepeat[];
 }
 
 /**
- * Location of a repeat in the running repeats
+ * Location of a running repeat;
  * 
- * @interface RepeatLocation
+ * @interface IRepeatLocation
  */
-interface RepeatLocation {
+interface IRepeatLocation {
+    repeat: IRepeat;
     location: number;
-    channel: string;
 }
 
 /**
@@ -60,126 +51,110 @@ interface RepeatLocation {
  * @class RepeatHandler
  */
 export class RepeatHandler {
-
-    private runningRepeats: IRepeats;
+    private runningRepeats: IRunningRepeats = {};
 
     /**
      * Creates an instance of RepeatHandler.
+     * @param {SepalSocket} socket SepalSocket instance
+     * @param {Rethink} rethink Rethink instance
      * 
      * @memberOf RepeatHandler
      */
-    public constructor(private socket: SepalSocket, private rethink: Rethink) {
-        this.runningRepeats = {};
+    constructor(private socket: SepalSocket, private rethink: Rethink) {
+        rethink.on("repeat:start", (repeat: IRepeat) =>
+            this.startRepeat(repeat).catch(console.error));
 
-        socket.rethink.on("repeat:start", (repeat: Repeat) => {
-            this.startRepeat(repeat).catch((error: string) => {
-                console.log(error);
-            });
-        });
-
-        socket.rethink.on("repeat:stop", (repeat: Repeat) => {
-            this.stopRepeat(repeat).catch((error: string) => {
-                console.log(error);
-            });
-        });
+        rethink.on("repeat:stop", (repeat: IRepeat) =>
+            this.stopRepeat(repeat).catch(console.error));
     }
 
     /**
      * Start a new repeat
      * 
      * @private
-     * @param {Repeat} repeat 
+     * @param {Repeat} repeat Repeat to start
      * 
      * @memberOf RepeatHandler
      */
-    private async startRepeat(repeat: Repeat) {
+    private async startRepeat(repeat: IRepeat) {
         repeat.period = repeat.period * 1000;
-        this.rethink.getCommand(repeat.command, repeat.channel).then((response: any) => {
-            const interval = setInterval(() => {
-                this.socket.sendToChannel(repeat.channel, "repeat", {response: {message: response[0]["response"]}});
-            }, repeat.period);
+        const command = await this.rethink.getCommand(repeat.command, repeat.channel);
 
-            const runningRepeat: RunningRepeat = {
-                channel: repeat.channel,
-                command: repeat.command,
-                interval: interval,
-                period: repeat.period
-            };
+        const interval: NodeJS.Timer = setInterval(() => {
+            this.socket.sendToChannel(repeat.channel, "repeat", command.response);
+        }, repeat.period);
+        repeat.interval = interval;
 
-            if (this.runningRepeats[repeat.channel] === undefined) {
-                this.runningRepeats[repeat.channel] = [runningRepeat];
-            } else {
-                this.runningRepeats[repeat.channel].push(runningRepeat);
+        if (this.runningRepeats[repeat.channel] === undefined) {
+            this.runningRepeats[repeat.channel] = [repeat];
+        } else {
+            this.runningRepeats[repeat.channel].push(repeat);
+        }
+    }
+
+    /**
+     * Stop a currently running repeat
+     * 
+     * @private
+     * @param {Repeat} repeat Repeat to stop
+     * 
+     * @memberOf RepeatHandler
+     */
+    private async stopRepeat(repeat: IRepeat) {
+        const repeatLocation = await this.findRepeat(repeat);
+        if (repeatLocation === null) {
+            Logger.error(`Stopping repeat was unable to be found! Repeat: \`${JSON.stringify(repeat)}\``);
+            return;
+        }
+
+        const stopping: IRepeat = this.runningRepeats[repeat.channel][repeatLocation];
+        clearInterval(stopping.interval);
+        delete this.runningRepeats[repeat.channel][repeatLocation];
+    }
+
+    /**
+     * Find a running repeat
+     * 
+     * @private
+     * @param {IRepeat} repeat Repeat to find
+     * @returns {Promise<IRepeatLocation>} The location of the repeat in the channels repeats
+     * 
+     * @memberOf RepeatHandler
+     */
+    private async findRepeat(repeat: IRepeat): Promise<number> {
+        return new Promise<number>((resolve: any, reject: any) => {
+            const keys = Object.keys(this.runningRepeats);
+            repeat.period = repeat.period * 1000;
+
+            for (let i = 0, length = keys.length; i < length; i++) {
+                this.runningRepeats[keys[i]].forEach((running: IRepeat) => {
+                    delete repeat.interval;
+                    delete running.interval;
+
+                    if (JSON.stringify(running) === JSON.stringify(repeat)) {
+                        return resolve(i);
+                    }
+                });
             }
+            return resolve(null);
         });
     }
 
     /**
-     * Stop a running repeat
-     * 
-     * @private
-     * @param {Repeat} repeat 
-     * 
-     * @memberOf RepeatHandler
-     */
-    private async stopRepeat(repeat: Repeat) {
-        const location: RepeatLocation = await this.findRepeat(repeat);
-        const runningRepeat: RunningRepeat = this.runningRepeats[location.channel][location.location];
-        clearInterval(runningRepeat.interval);
-        delete this.runningRepeats[location.channel][location.location];
-    }
-
-    /**
-     * Find the location of a repeat, if it exists
-     * 
-     * @private
-     * @param {Repeat} repeat 
-     * @returns {Promise<RepeatLocation>} 
-     * 
-     * @memberOf RepeatHandler
-     */
-    private async findRepeat(repeat: Repeat): Promise<RepeatLocation> {
-        repeat.period = repeat.period * 1000;
-        const keys = Object.keys(this.runningRepeats);
-        let location: RepeatLocation = null;
-
-        for (let i = 0, length = keys.length; i < length; i++) {
-            this.runningRepeats[keys[i]].forEach((runningRepeat: Repeat) => {
-                const running: Repeat = {
-                    command: runningRepeat.command,
-                    period: runningRepeat.period,
-                    channel: runningRepeat.channel
-                };
-                if (JSON.stringify(running) === JSON.stringify(repeat)) {
-                    location = {
-                        location: i,
-                        channel: runningRepeat.channel
-                    };
-                }
-            });
-        }
-        return location;
-    }
-
-    /**
-     * Start all the active repeats
+     * Start all repeats
      * 
      * 
      * @memberOf RepeatHandler
      */
     public async startRepeats() {
-        const repeats: any[] = await this.rethink.getAllRepeats();
-
-        repeats.forEach((databaseRepeat: any) => {
-            this.rethink.getCommand(databaseRepeat.commandName, databaseRepeat.channel).then((response: any) => {
-                let repeat: RepeatResponse = {
-                    channel: databaseRepeat.token,
-                    command: databaseRepeat.commandName,
-                    period: databaseRepeat.period,
-                    response: response
-                };
-                this.startRepeat(repeat);
-            });
+        const repeats: IRepeat[] = await this.rethink.getAllRepeats();
+        repeats.forEach((dbRepeat: any) => {
+            const repeat: IRepeat = {
+                channel: dbRepeat.token,
+                command: dbRepeat.command,
+                period: dbRepeat.period
+            };
+            this.startRepeat(repeat);
         });
     }
 }

@@ -12,10 +12,10 @@ interface IConfig {
         db: string;
     };
     redis: {
+        db: string;
         host: string;
-        port: number;
+        // port: number;
         password: string;
-        db: number;
     };
     sentry: {
         dsn: string;

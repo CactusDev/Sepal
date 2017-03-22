@@ -11,10 +11,10 @@ export default {
         db: "api"
     },
     redis: {
+        db: "1",
         host: "localhost",
         port: 4000,
-        password: "supergudpass",
-        db: 1
+        password: ""
     },
     sentry: {
         dsn: "https://amazing.neato.stuff/keys",

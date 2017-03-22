@@ -5,8 +5,20 @@ import { RethinkConnection, DocumentCursor, Model } from "rethinkts";
 
 import { EventEmitter } from "events";
 
-import Logger from "../logger";
+import { Logger } from "../logger";
 import { Alias, Command, Config, Quote, Repeat, Social, Trust } from "./models";
+
+/**
+ * Status of the document
+ *
+ * @export
+ * @enum {number}
+ */
+export enum Status {
+    CREATED,
+    DELETED,
+    CHANGED
+};
 
 /**
  * Handle rethink interactions
@@ -54,29 +66,43 @@ export class Rethink extends EventEmitter {
 
                 model.changes().then((changes) => {
                     changes.each((error, cursor) => {
-                        this.modelStatus(cursor).then((state: string) => {
+                        this.modelStatus(cursor).then((state) => {
                             if (keys[i] === "repeat") {
-                                if (state === "new") {
+                                if (state === Status.CREATED) {
                                     const data: any = cursor["new_val"];
                                     this.emit("repeat:start", {
                                         command: data.commandName,
                                         period: data.period,
                                         channel: data.token
                                     });
-                                } else {
-                                    const data: any = cursor["old_val"] || cursor["new_val"];
+                                } else if (state === Status.CHANGED) {
+                                    const removed: any = cursor["old_val"];
+                                    const added: any = cursor["new_val"];
+
+                                    this.emit("repeat:stop", {
+                                        command: removed.commandName,
+                                        period: removed.period,
+                                        channel: removed.token
+                                    });
+
+                                    this.emit("repeat:start", {
+                                        command: added.commandName,
+                                        period: added.period,
+                                        channel: added.token
+                                    });
+                                } else if (state === Status.DELETED) {
+                                    const data: any = cursor["old_val"];
                                     this.emit("repeat:stop", {
                                         command: data.commandName,
                                         period: data.period,
                                         channel: data.token
                                     });
                                 }
-                            } else {
-                                this.emit("broadcast:channel", {
-                                    event: keys[i],
-                                    data: cursor
-                                });
                             }
+                            this.emit("broadcast:channel", {
+                                event: keys[i],
+                                data: cursor
+                            });
                         });
                     });
                 });
@@ -95,21 +121,19 @@ export class Rethink extends EventEmitter {
      * @memberOf Rethink
      */
     public async getAllRepeats(): Promise<any> {
-        return this.rethink.models["repeat"].all().then((res: any[]) => {
-            return res;
-        });
+        return await Repeat.find<Repeat>({});
     }
 
     /**
      * Get the response of a command from the name given
      * 
      * @param {string} commandName 
-     * @returns {Promise<any>} 
+     * @returns {Promise<Command>} 
      * 
      * @memberOf Rethink
      */
-    public async getCommand(name: string, channel: string): Promise<Command> {
-        return await Command.findOne<Command>({ name, channel });
+    public async getCommand(id: string, channel: string): Promise<Command> {
+        return await Command.get<Command>(id);
     }
 
     /**
@@ -117,17 +141,17 @@ export class Rethink extends EventEmitter {
      * 
      * @private
      * @param {DocumentCursor<Model>} model 
-     * @returns {Promise<string>} 
+     * @returns {Promise<Status>} 
      * 
      * @memberOf Rethink
      */
-    private async modelStatus(model: DocumentCursor<Model>): Promise<string> {
+    private async modelStatus(model: DocumentCursor<Model>): Promise<Status> {
         if (model.new_val !== null && model.old_val === null) {
-            return "new";
+            return Status.CREATED;
         } else if (model.new_val !== null && model.old_val !== null) {
-            return "changed";
+            return Status.CHANGED;
         } else {
-            return "deleted";
+            return Status.DELETED;
         }
     }
 }
