@@ -1,5 +1,5 @@
 
-import { Field, Model, Validators } from "rethinkts";
+import { Field, Model } from "rethinkts";
 
 export class Command extends Model {
     @Field()
@@ -12,7 +12,7 @@ export class Command extends Model {
     public response: Object[];
 
     @Field()
-    public createdAt: any; // TODO: Find datetime thing
+    public createdAt: string;
 
     @Field()
     public token: string;
@@ -21,7 +21,7 @@ export class Command extends Model {
     public enabled: boolean;
 
     @Field()
-    public arguments: Object;
+    public arguments: Object[];
 
     @Field()
     public count: number;

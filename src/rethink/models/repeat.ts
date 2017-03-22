@@ -1,5 +1,5 @@
 
-import { Field, Model, Validators } from "rethinkts";
+import { Field, Model } from "rethinkts";
 
 export class Repeat extends Model {
     @Field()
@@ -15,8 +15,11 @@ export class Repeat extends Model {
     public repeatName: string;
 
     @Field()
-    public comamnd: string;
+    public command: string;
 
     @Field()
     public commandName: string;
+
+    @Field()
+    public createdAt: string;
 }
