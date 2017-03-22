@@ -1,58 +1,84 @@
-import { Server } from "./server";
+import Config from "./configs/config";
+
+import { Rethink } from "./rethink";
+import { SepalSocket } from "./socket";
+import { RepeatHandler } from "./repeat";
+import { Logger } from "./logger";
 import { Redis } from "./redis";
 
-import { Active } from "./active";
-
-import {Logger } from "./logging";
-
-const cmdLineArgs = require("command-line-args");
-const raven = require("raven");
+/**
+ * Init sentry
+ * 
+ */
+async function initLogger() {
+    await Logger.createSentry(Config.sentry);
+}
 
 /**
- * This uses a config file which is created using the TypeScript compile.
+ * Connect to rethink
  * 
- * See: "configs" dir for an example and create a new version with the name of the
- *      env the appliction is running under.
+ * @returns Rethink instance
  */
-const config: IConfig = require("./configs/development");
+async function createRethink() {
+    const rethink: Rethink = new Rethink(Config);
+    await rethink.connect();
+    return rethink;
+}
 
-const options = [
-    { name: "debug", alias: "d", type: Boolean }
-];
 
-// Set the debug mode if needed.
-const parsed = cmdLineArgs(options);
-Logger.debugMode = parsed.debug;
+/**
+ * Connect to redis.
+ * 
+ * @returns Redis instance
+ */
+async function createRedis() {
+    const redis: Redis = new Redis(Config);
+    await redis.connect();
+    return redis;
+}
 
-// Check that the env is production and that the dsn has been set to enable Sentry support.
-if (config.env === "prod") {
-    if (config.sentry.dsn) {
-        Logger.log("Initializing Setry...");
-        const client = new raven.Client(config.sentry.dsn);
-        client.patchGlobal();
-        // Give the logger the same Raven instance.
-        Logger.raven = client;
-        Logger.log("Sentry initialized...");
+
+/**
+ * Start repeats
+ * 
+ * @param {SepalSocket} socket SepalSocket instance
+ * @param {Rethink} rethink RethinkDB instance
+ */
+async function startRepeat(socket: SepalSocket, rethink: Rethink) {
+    const repeat: RepeatHandler = new RepeatHandler(socket, rethink);
+    await repeat.startRepeats();
+}
+
+/**
+ * Create Sepal's websocket and listen
+ * 
+ * @param {Rethink} rethink RethinkDB instance
+ * @returns SepalSocket instance
+ */
+async function createSocket(rethink: Rethink, redis: Redis) {
+    const socket: SepalSocket = new SepalSocket(Config, rethink);
+    await socket.create();
+
+    return socket;
+}
+
+
+/**
+ * Init everything
+ * 
+ */
+async function init() {
+    try {
+        await initLogger();
+
+        const rethink: Rethink = await createRethink();
+        const redis: Redis = await createRedis();
+        const socket: SepalSocket = await createSocket(rethink, redis);
+
+        await startRepeat(socket, rethink);
+    } catch (e) {
+        Logger.error(String(e));
     }
 }
 
-// Cretae a "Pub" connection to the Redis Server.
-const RedisPub = new Redis();
-// const active = new Active(RedisPub, 5);
-
-// TODO: Fix the active stuff.
-
-// Connect to the Redis server.
-/*RedisPub.connect(config)
-    .then(() => {
-        Logger.log("Connected to the Redis server.");
-        // Create the server.
-        let server = new Server(RedisPub, config);
-        // Start listening to connections.
-        server.listen();
-
-        // setInterval(() => active.checkActive(), 50000);
-    });*/
-
-let server = new Server(null, config);
-server.listen();
+init();

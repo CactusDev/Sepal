@@ -1,30 +1,44 @@
 {
   "name": "sepal",
   "version": "1.0.0",
-  "description": "CactusDev's service for sending event packets",
-  "main": "",
+  "description": "Event service for CactusBot",
+  "main": "gulpfile.js",
   "scripts": {
-    "lint": "tslint \"src/**/*.ts\"",
-    "start": "gulp && node dist/",
-    "build": "tsc src/"
+    "run": "node dist",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cactusdev/sepal.git"
+  },
+  "keywords": [
+    "cactusbot",
+    "catctusdev"
+  ],
   "author": "CactusDev",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cactusdev/sepal/issues"
+  },
+  "homepage": "https://github.com/cactusdev/sepal#readme",
   "dependencies": {
-    "bluebird": "^3.4.6",
-    "bufferutil": "^1.2.1",
-    "colors": "^1.1.2",
-    "command-line-args": "^3.0.2",
+    "@types/bluebird": "^3.5.1",
+    "@types/ws": "0.0.39",
+    "bluebird": "^3.5.0",
+    "chalk": "^1.1.3",
+    "dateformat": "^2.0.0",
     "gulp": "^3.9.1",
-    "gulp-typescript": "^3.1.2",
+    "gulp-typescript": "^3.1.5",
     "merge2": "^1.0.2",
-    "raven": "^0.12.1",
-    "redis": "^2.6.3",
+    "raven": "^0.12.3",
+    "redis": "^2.7.1",
+    "reflect-metadata": "^0.1.8",
+    "rethinkts": "^0.5.0",
     "thinky": "^2.3.7",
     "tslint": "^3.7.3",
+    "typescript": "^2.2.1",
     "utf-8-validate": "^1.2.1",
-    "ws": "^1.1.1",
-    "typescript": "2.2.1"
+    "ws": "^2.2.1"
   },
   "devDependencies": {
     "@types/bluebird": "^3.0.35",

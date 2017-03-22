@@ -1,9 +1,11 @@
-var gulp = require("gulp");
-var ts = require("gulp-typescript");
-var merge = require("merge2");
-var project = ts.createProject("tsconfig.json", { noImplicitAny: true });
+const gulp = require("gulp");
+const ts = require("gulp-typescript");
 
-gulp.task("default", () => {
-    var result = project.src().pipe(project());
-    return result.js.pipe(gulp.dest("dist"))
+const project = ts.createProject("tsconfig.json");
+
+gulp.task("build", () => {
+    const result = project.src().pipe(project());
+    return result.js.pipe(gulp.dest("js"))
 });
+
+gulp.task("default", ["build"]);

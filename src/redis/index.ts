@@ -1,44 +1,66 @@
-import * as Promise from "bluebird";
-import { Logger } from "../logging";
 
+import * as Bluebird from "bluebird";
+import { Logger } from "../logger";
 const redis = require("redis");
 
-Promise.promisifyAll(redis.RedisClient.prototype);
-Promise.promisifyAll(redis.Multi.prototype);
+Bluebird.promisifyAll(redis.RedisClient);
+Bluebird.promisifyAll(redis.Multi);
 
+/**
+ * Redis handler
+ * 
+ * @export
+ * @class Redis
+ */
 export class Redis {
+    private client: any = null;
 
-    client: any = null;
+    /**
+     * Creates an instance of Redis.
+     * @param {IConfig} config 
+     * 
+     * @memberOf Redis
+     */
+    constructor(private config: IConfig) {
 
-    connect(config: IConfig): Promise<any> {
-        return new Promise((resolve: any, reject: any) => {
-            // Timeout to create an error if we're unable to connect.
-            let connectionTimeout: any = setTimeout(() => {
+    }
+
+    /**
+     * Connect to redis
+     * 
+     * @returns {Promise<any>} connected
+     * 
+     * @memberOf Redis
+     */
+    public async connect(): Promise<any> {
+        return new Promise<any>((resolve: any, reject: any) => {
+            let connectionTimeout = setTimeout(() => {
                 return reject("Unable to connect to Redis.");
             }, 2000);
+            this.client = redis.createClient(this.config.redis);
 
-            let client = redis.createClient(config.redis);
-
-            client.on("reconnection", () => {
-                Logger.debug("Connection to Redis was lost. Attempting to reconnect...");
+            this.client.on("reconnection", () => {
+                Logger.warning("Connection to Redis was lost. Attempting to reconnect...");
             });
 
-            client.on("error", (error: string) => {
-                Logger.error(error);
-            });
-
-            client.on("ready", () => {
+            this.client.on("error", Logger.error);
+            this.client.on("ready", () => {
                 clearTimeout(connectionTimeout);
-                this.client = client;
-
                 resolve();
             });
         });
     }
 
-    disconnect(): Promise<any> {
-        return new Promise((resolve: any, reject: any) => {
-            let disconnectionTimeout: any = setTimeout(() => {
+    /**
+     * Disconnect from redis
+     * 
+     * @returns {Promise<any>} disconnected
+     * 
+     * @memberOf Redis
+     */
+    public async disconnect(): Promise<any> {
+        return new Promise<any>((resolve: any, reject: any) => {
+            let disconnectionTimeout = setTimeout(() => {
                 return reject("Unable to disconnect from Redis.");
             }, 2000);
 
@@ -51,22 +73,56 @@ export class Redis {
         });
     }
 
-    set(key: string, value: string, expire?: number): Promise<string> {
+    /**
+     * Set a key
+     * 
+     * @param {string} key name of the key
+     * @param {string} value value of the key
+     * @param {number} [expire] time until expiration
+     * @returns {Promise<string>} result
+     * 
+     * @memberOf Redis
+     */
+    public async set(key: string, value: string, expire?: number): Promise<string> {
         if (expire != null) {
             return this.client.setexAsync(key, expire, value);
         }
         return this.client.setAsync(key, value);
     }
 
-    get(key: string): Promise<any> {
+    /**
+     * Get a key
+     * 
+     * @param {string} key Key to get
+     * @returns {Promise<any>} result
+     * 
+     * @memberOf Redis
+     */
+    public async get(key: string): Promise<any> {
         return this.client.getAsync(key);
     }
 
-    delete(key: string): Promise<any> {
+    /**
+     * Delete a key
+     * 
+     * @param {string} key Key to delete
+     * @returns {Promise<any>} result
+     * 
+     * @memberOf Redis
+     */
+    public async delete(key: string): Promise<any> {
         return this.client.delAsync(key);
     }
 
-    increment(key: string): Promise<any> {
+    /**
+     * Increment a key
+     * 
+     * @param {string} key The key to be incremented
+     * @returns {Promise<any>} result
+     * 
+     * @memberOf Redis
+     */
+    public async increment(key: string): Promise<any> {
         return this.client.incrAsync(key);
     }
 }
