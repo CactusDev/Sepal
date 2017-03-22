@@ -7,7 +7,7 @@ const dateFormat = require("dateformat");
  * @export
  * @class Logger
  */
-export default class {
+export class Logger {
 
     /**
      * Log with a normal level
@@ -63,7 +63,7 @@ export default class {
      * @memberOf Logger
      */
     private static formatMessage(prefix: string, message: string | Object) {
-        if (typeof(message) === typeof("")) {
+        if (message instanceof String) {
             console.log(this.getTime() + prefix + chalk.white(message));
         } else if (message instanceof Object) {
             console.log(this.getTime() + prefix + chalk.white(JSON.stringify(message)));

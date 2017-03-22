@@ -1,6 +1,5 @@
 import { SepalSocket } from "../socket";
 import { Rethink } from "../rethink";
-import Logger from "../logger";
 
 /**
  * Repeat object
@@ -94,11 +93,12 @@ export class RepeatHandler {
      */
     private async startRepeat(repeat: Repeat) {
         repeat.period = repeat.period * 1000;
-        this.rethink.getCommand(repeat.command, repeat.channel).then((response: any) => {
+        this.rethink.getCommand(repeat.command, repeat.channel).then((command) => {
+            console.log(command);
             const interval = setInterval(() => {
                 this.socket.sendToChannel(repeat.channel, "repeat", {
                     response: {
-                        message: response["response"]
+                        message: command.response
                     }
                 });
             }, repeat.period);

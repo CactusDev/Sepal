@@ -5,7 +5,7 @@ import { RethinkConnection, DocumentCursor, Model } from "rethinkts";
 
 import { EventEmitter } from "events";
 
-import Logger from "../logger";
+import { Logger } from "../logger";
 import { Alias, Command, Config, Quote, Repeat, Social, Trust } from "./models";
 
 /**
