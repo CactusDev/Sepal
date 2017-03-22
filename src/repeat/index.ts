@@ -123,16 +123,23 @@ export class RepeatHandler {
      * @memberOf RepeatHandler
      */
     private async findRepeat(repeat: IRepeat): Promise<number> {
-        const keys = Object.keys(this.runningRepeats);
+        return new Promise<number>((resolve: any, reject: any) => {
+            const keys = Object.keys(this.runningRepeats);
+            repeat.period = repeat.period * 1000;
 
-        for (let i = 0, length = keys.length; i < length; i++) {
-            this.runningRepeats[keys[i]].forEach((running: IRepeat) => {
-                if (running === repeat) {
-                    return i;
-                }
-            });
-        }
-        return null;
+            for (let i = 0, length = keys.length; i < length; i++) {
+                this.runningRepeats[keys[i]].forEach((running: IRepeat) => {
+                    delete repeat.interval;
+                    delete running.interval;
+
+                    if (JSON.stringify(running) === JSON.stringify(repeat)) {
+                        console.log(running);
+                        return resolve(i);
+                    }
+                });
+            }
+            return resolve(null);
+        });
     }
 
     /**
