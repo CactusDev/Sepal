@@ -24,6 +24,7 @@ npm i
 
 Next, open `src/configs/config.ts` and fill out all the fields.
 
+Then, run `tsc` to compile into `js/`. To run sepal, run `node js/.`
 
 ## Licence
 
