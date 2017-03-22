@@ -22,7 +22,7 @@ npm i -g typescript
 npm i
 ```
 
-Next, open `src/configs/default.ts` and fill out all the fields.
+Next, open `src/configs/config.ts` and fill out all the fields.
 
 
 ## Licence
