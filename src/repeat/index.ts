@@ -96,7 +96,11 @@ export class RepeatHandler {
         repeat.period = repeat.period * 1000;
         this.rethink.getCommand(repeat.command, repeat.channel).then((response: any) => {
             const interval = setInterval(() => {
-                this.socket.sendToChannel(repeat.channel, "repeat", {response: {message: response[0]["response"]}});
+                this.socket.sendToChannel(repeat.channel, "repeat", {
+                    response: {
+                        message: response["response"]
+                    }
+                });
             }, repeat.period);
 
             const runningRepeat: RunningRepeat = {
