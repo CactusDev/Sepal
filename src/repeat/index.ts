@@ -84,7 +84,6 @@ export class RepeatHandler {
             this.socket.sendToChannel(repeat.channel, "repeat", command.response);
         }, repeat.period);
         repeat.interval = interval;
-        console.log(command);
 
         if (this.runningRepeats[repeat.channel] === undefined) {
             this.runningRepeats[repeat.channel] = [repeat];
@@ -133,7 +132,6 @@ export class RepeatHandler {
                     delete running.interval;
 
                     if (JSON.stringify(running) === JSON.stringify(repeat)) {
-                        console.log(running);
                         return resolve(i);
                     }
                 });
