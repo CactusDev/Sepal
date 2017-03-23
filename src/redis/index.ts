@@ -3,8 +3,8 @@ import * as Bluebird from "bluebird";
 import { Logger } from "../logger";
 const redis = require("redis");
 
-Bluebird.promisifyAll(redis.RedisClient);
-Bluebird.promisifyAll(redis.Multi);
+Bluebird.promisifyAll(redis.RedisClient.prototype);
+Bluebird.promisifyAll(redis.Multi.prototype);
 
 /**
  * Redis handler

@@ -1,3 +1,4 @@
+import { EventCache } from "./caching";
 import Config from "./configs/config";
 
 import { Rethink } from "./rethink";
@@ -49,14 +50,19 @@ async function startRepeat(socket: SepalSocket, rethink: Rethink) {
     await repeat.startRepeats();
 }
 
+async function createCache(redis: Redis, rethink: Rethink) {
+    const cache = new EventCache(redis, rethink);
+    return cache;
+}
+
 /**
  * Create Sepal's websocket and listen
  * 
  * @param {Rethink} rethink RethinkDB instance
  * @returns SepalSocket instance
  */
-async function createSocket(rethink: Rethink, redis: Redis) {
-    const socket: SepalSocket = new SepalSocket(Config, rethink);
+async function createSocket(rethink: Rethink, redis: Redis, cache: EventCache) {
+    const socket: SepalSocket = new SepalSocket(Config, rethink, cache);
     await socket.create();
 
     return socket;
@@ -73,11 +79,12 @@ async function init() {
 
         const rethink: Rethink = await createRethink();
         const redis: Redis = await createRedis();
-        const socket: SepalSocket = await createSocket(rethink, redis);
+        const cache: EventCache = await createCache(redis, rethink);
+        const socket: SepalSocket = await createSocket(rethink, redis, cache);
 
         await startRepeat(socket, rethink);
     } catch (e) {
-        Logger.error(String(e));
+        Logger.error(<string>e);
     }
 }
 

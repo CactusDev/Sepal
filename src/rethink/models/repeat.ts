@@ -1,6 +1,13 @@
 
 import { Field, Model } from "rethinkts";
 
+/**
+ * Repeat database model
+ * 
+ * @export
+ * @class Repeat
+ * @extends {Model}
+ */
 export class Repeat extends Model {
     @Field()
     public id: string;

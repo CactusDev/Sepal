@@ -1,6 +1,13 @@
 
-import { Field, Model, Validators } from "rethinkts";
+import { Field, Model } from "rethinkts";
 
+/**
+ * Alias database model
+ * 
+ * @export
+ * @class Alias
+ * @extends {Model}
+ */
 export class Alias extends Model {
     @Field()
     public id: string;
