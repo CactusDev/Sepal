@@ -20,5 +20,5 @@ export interface BasePacket {
 export interface PacketParser {
     fields: string[];
 
-    parse(packet: Object): Promise<BasePacket>;
+    parse(packet: Object): Promise<any>;
 }

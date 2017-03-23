@@ -1,5 +1,5 @@
-import { Rethink } from "../rethink";
 
+import { Rethink } from "../rethink";
 import { Redis } from "../redis";
 
 /**
@@ -33,7 +33,7 @@ export class EventCache {
     }
 
     /**
-     * 
+     * Cache an event
      * 
      * @param {string} event event type to cache
      * @param {number} cacheTime time to cache
@@ -42,9 +42,9 @@ export class EventCache {
      * @memberOf EventCache
      */
     public async cacheEvent(event: string, cacheTime: number, data: CachedEvent) {
-        if (!this.isEventCached(event, data.channel, data.user)) {
-            const cached = await this.rethink.setEvent(data.channel, data.user, event, new Date().toString());
-            await this.redis.set(`${data.channel}:${event}:${data.user}:${cached.id}`, "true", cacheTime);
+        if (this.shouldCache(event, data.channel, data.user)) {
+            await this.rethink.setEvent(data.channel, data.user, event, new Date().toString());
+            await this.redis.set(`${data.channel}:${event}:${data.user}`, "true", cacheTime);
         }
     }
 
@@ -58,9 +58,13 @@ export class EventCache {
      * 
      * @memberOf EventCache
      */
-    public async isEventCached(event: string, channel: string, user: string): Promise<boolean> {
+    public async shouldCache(event: string, channel: string, user: string): Promise<boolean> {
         const cached = await this.rethink.getEvent(channel, user, event);
-        const redisEvent: string = await this.redis.get(`${channel}:${event}:${user}:${cached.id}`);
-        return redisEvent === "true";
+        if (!cached) {
+            return true;
+        }
+
+        const redisEvent = await this.redis.get(`${channel}:${event}:${user}`);
+        return redisEvent !== "true";
     }
 }

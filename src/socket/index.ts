@@ -1,8 +1,9 @@
+import { EventCache } from "../caching";
 import { Server, IServerOptions } from "ws";
 import { Logger } from "../logger";
 import { PacketParser } from "../packets/packet";
 
-import { JoinPacketParser, ErrorBuilder, JoinedBuilder } from "../packets";
+import { JoinPacketParser, EventPacketParser, ErrorBuilder, JoinedBuilder } from "../packets";
 import { Rethink } from "../rethink";
 
 /**
@@ -81,12 +82,13 @@ export class SepalSocket {
      *
      * @memberOf SepalSocket
      */
-    public constructor(private config: IConfig, public rethink: Rethink) {
+    public constructor(private config: IConfig, public rethink: Rethink, private eventCache: EventCache) {
         this.errorBuilder = new ErrorBuilder();
         this.joinedBuilder = new JoinedBuilder();
 
         this.parsers = {
-            join: new JoinPacketParser()
+            join: new JoinPacketParser(),
+            event: new EventPacketParser()
         };
 
         rethink.on("broadcast:channel", (data: any) => {
@@ -155,6 +157,12 @@ export class SepalSocket {
                 const packetData = packet as any;
                 if (packetData.type in this.parsers) {
                     this.parsers[packetData.type].parse(packetData.data).then((parsed) => {
+                        if (parsed === null) {
+                            this.errorBuilder.create("packet data didn't contain all values.", 1005).then((error: string) => {
+                                connection.send(error);
+                                return;
+                            });
+                        }
                         if (packetData.type === "join") {
                             if (this.clients[parsed.channel] === undefined) {
                                 this.clients[parsed.channel] = [connection];
@@ -164,6 +172,21 @@ export class SepalSocket {
 
                             this.joinedBuilder.create(parsed.channel, true).then((joinedPacket: string) => {
                                 connection.send(joinedPacket);
+                            });
+                        } else if (packetData.type === "event") {
+                            const cacheTime = parsed.cacheTime;
+                            const channel = parsed.channel;
+                            const user = parsed.user;
+                            const event = parsed.event;
+
+                            this.eventCache.cacheEvent(event, cacheTime, {
+                                channel: channel,
+                                user: user
+                            }).then(() => {
+                                console.log("cached");
+                                // TODO: Tell client it was cached
+                            }).catch((error) => {
+                                console.log(error);
                             });
                         }
                     });

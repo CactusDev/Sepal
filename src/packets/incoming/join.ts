@@ -30,6 +30,14 @@ export class JoinPacketParser implements PacketParser {
         "channel"
     ];
 
+    /**
+     * Parse the data of the packet
+     * 
+     * @param {Object} packet Data section of the packet
+     * @returns {Promise<JoinPacket>} Valid packet from the data or null
+     * 
+     * @memberOf JoinPacketParser
+     */
     public async parse(packet: Object): Promise<JoinPacket> {
         // TODO: Check if the channel supplied is a channel that we have
         this.fields.forEach((field: string) => {

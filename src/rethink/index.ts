@@ -60,6 +60,7 @@ export class Rethink extends EventEmitter {
             this.rethink.registerModel(Repeat);
             this.rethink.registerModel(Social);
             this.rethink.registerModel(Trust);
+            this.rethink.registerModel(Event);
 
             const keys = Object.keys(this.rethink.models);
             for (let i = 0, length = keys.length; i < length; i++) {
@@ -150,7 +151,7 @@ export class Rethink extends EventEmitter {
      * @memberOf Rethink
      */
     public async getEvent(channel: string, user: string, event: string): Promise<Event> {
-        return await Event.get<Event>({channel, user, event});
+        return (await Event.find<Event>({channel, user, event}))[0];
     }
 
     /**
