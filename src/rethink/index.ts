@@ -6,7 +6,7 @@ import { RethinkConnection, DocumentCursor, Model } from "rethinkts";
 import { EventEmitter } from "events";
 
 import { Logger } from "../logger";
-import { Alias, Command, Config, Quote, Repeat, Social, Trust } from "./models";
+import { Alias, Command, Config, Quote, Repeat, Social, Trust, Event } from "./models";
 
 /**
  * Status of the document
@@ -39,9 +39,10 @@ export class Rethink extends EventEmitter {
     }
 
     /**
-     * Connect to rethink and create all the models
-     *
-     *
+     * Connect to Rethink and create all the models.
+     * 
+     * @returns {Promise<any>} 
+     * 
      * @memberOf Rethink
      */
     public async connect(): Promise<any> {
@@ -98,6 +99,7 @@ export class Rethink extends EventEmitter {
                                         channel: data.token
                                     });
                                 }
+                                return;
                             }
                             this.emit("broadcast:channel", {
                                 event: keys[i],
@@ -116,7 +118,7 @@ export class Rethink extends EventEmitter {
     /**
      * Get all repeats in the database
      * 
-     * @returns {Promise<any>} 
+     * @returns {Promise<any>} List of repeats to be started
      * 
      * @memberOf Rethink
      */
@@ -125,10 +127,11 @@ export class Rethink extends EventEmitter {
     }
 
     /**
-     * Get the response of a command from the name given
+     * Get a command from id
      * 
-     * @param {string} commandName 
-     * @returns {Promise<Command>} 
+     * @param {string} id id of the command
+     * @param {string} channel channel the command is in
+     * @returns {Promise<Command>} the command
      * 
      * @memberOf Rethink
      */
@@ -137,11 +140,47 @@ export class Rethink extends EventEmitter {
     }
 
     /**
+     * Get an event from the database
+     * 
+     * @param {string} channel the channel the event was in
+     * @param {string} user user that executed the event
+     * @param {string} event the event type
+     * @returns {Promise<Event>} the event in the database
+     * 
+     * @memberOf Rethink
+     */
+    public async getEvent(channel: string, user: string, event: string): Promise<Event> {
+        return await Event.get<Event>({channel, user, event});
+    }
+
+    /**
+     * Create a new event in Rethink
+     * 
+     * @param {string} channel the channel the even was in
+     * @param {string} user the user that executed the event
+     * @param {string} event the event type to cache
+     * @param {string} date the time that the event occurred
+     * @returns {Promise<Event>} the event in the database
+     * 
+     * @memberOf Rethink
+     */
+    public async setEvent(channel: string, user: string, event: string, date: string): Promise<Event> {
+        const cachedEvent = new Event({
+            channel: channel,
+            user: user,
+            event: event,
+            occurredAt: date
+        });
+        return await cachedEvent.save();
+    }
+
+
+    /**
      * Get the status of a model in string form
      * 
      * @private
-     * @param {DocumentCursor<Model>} model 
-     * @returns {Promise<Status>} 
+     * @param {DocumentCursor<Model>} model The model to check
+     * @returns {Promise<Status>} Status of the model
      * 
      * @memberOf Rethink
      */

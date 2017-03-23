@@ -1,5 +1,12 @@
-import { Field, Model, Validators } from "rethinkts";
+import { Field, Model } from "rethinkts";
 
+/**
+ * Quote database model
+ * 
+ * @export
+ * @class Quote
+ * @extends {Model}
+ */
 export class Quote extends Model {
     @Field()
     public id: string;

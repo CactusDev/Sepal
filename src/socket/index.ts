@@ -222,7 +222,7 @@ export class SepalSocket {
      * Broadcast to all connected clients
      * 
      * @private
-     * @param {*} packet 
+     * @param {*} packet The packet to broadcast
      * 
      * @memberOf SepalSocket
      */

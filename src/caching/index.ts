@@ -1,5 +1,6 @@
+import { Rethink } from "../rethink";
 
-\import { Redis } from "../redis";
+import { Redis } from "../redis";
 
 /**
  * Event waiting to be cached.
@@ -22,33 +23,44 @@ export class EventCache {
 
     /**
      * Creates an instance of EventCache.
+     * @param {Redis} redis redis instance
+     * @param {Rethink} rethink rethink instance 
      * 
      * @memberOf EventCache
      */
-    constructor(private redis: Redis) {
+    constructor(private redis: Redis, private rethink: Rethink) {
 
     }
 
     /**
-     * Cache an event in Redis.
      * 
-     * @param {string} event 
-     * @param {CachedEvent} data 
+     * 
+     * @param {string} event event type to cache
+     * @param {number} cacheTime time to cache
+     * @param {CachedEvent} data information about the event
      * 
      * @memberOf EventCache
      */
     public async cacheEvent(event: string, cacheTime: number, data: CachedEvent) {
-        const cachedEvent: CachedEvent = this.isEventCached(event, data.channel);
+        if (!this.isEventCached(event, data.channel, data.user)) {
+            const cached = await this.rethink.setEvent(data.channel, data.user, event, new Date().toString());
+            await this.redis.set(`${data.channel}:${event}:${data.user}:${cached.id}`, "true", cacheTime);
+        }
     }
 
-    public async isEventCached(event: string, channel: string): Promise<CachedEvent> {
-        const cacheEvent = await this.redis.get(`${channel}:${event}`);
-        if (cacheEvent) {
-            return {
-                channel: cacheEvent.channel,
-                user: cacheEvent.user
-            };
-        }
-        return null;
+    /**
+     * Check if an event is cached
+     * 
+     * @param {string} event event type
+     * @param {string} channel the channel the event was in
+     * @param {string} user the user that executed the event
+     * @returns {Promise<boolean>} event existance
+     * 
+     * @memberOf EventCache
+     */
+    public async isEventCached(event: string, channel: string, user: string): Promise<boolean> {
+        const cached = await this.rethink.getEvent(channel, user, event);
+        const redisEvent: string = await this.redis.get(`${channel}:${event}:${user}:${cached.id}`);
+        return redisEvent === "true";
     }
 }
