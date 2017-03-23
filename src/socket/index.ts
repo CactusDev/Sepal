@@ -1,3 +1,4 @@
+import { EventCache } from "../caching";
 import { Server, IServerOptions } from "ws";
 import { Logger } from "../logger";
 import { PacketParser } from "../packets/packet";
@@ -81,7 +82,7 @@ export class SepalSocket {
      *
      * @memberOf SepalSocket
      */
-    public constructor(private config: IConfig, public rethink: Rethink) {
+    public constructor(private config: IConfig, public rethink: Rethink, private eventCache: EventCache) {
         this.errorBuilder = new ErrorBuilder();
         this.joinedBuilder = new JoinedBuilder();
 
@@ -164,6 +165,28 @@ export class SepalSocket {
 
                             this.joinedBuilder.create(parsed.channel, true).then((joinedPacket: string) => {
                                 connection.send(joinedPacket);
+                            });
+                        } else if (packetData.type === "event") {
+                            const cacheTime = parsed.cacheTime;
+                            const channel = parsed.channel;
+                            const user = parsed.user;
+                            const event = parsed.event;
+
+                            this.eventCache.cacheEvent(event, cacheTime, {
+                                channel: channel,
+                                user: user
+                            }).then(() => {
+                                connection.send(JSON.stringify({
+                                    type: "cached",
+                                    data: {
+                                        event: event,
+                                        user: user,
+                                        channel: channel,
+                                        cacheTime: cacheTime
+                                    }
+                                }));
+                            }).catch((error) => {
+                                console.log(error);
                             });
                         }
                     });
