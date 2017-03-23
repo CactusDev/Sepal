@@ -1,6 +1,13 @@
 
-import { Field, Model, Validators } from "rethinkts";
+import { Field, Model } from "rethinkts";
 
+/**
+ * Trust database model
+ * 
+ * @export
+ * @class Trust
+ * @extends {Model}
+ */
 export class Trust extends Model {
     @Field()
     public id: string;

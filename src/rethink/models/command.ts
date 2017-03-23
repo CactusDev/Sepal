@@ -1,6 +1,13 @@
 
 import { Field, Model } from "rethinkts";
 
+/**
+ * Command database model
+ * 
+ * @export
+ * @class Command
+ * @extends {Model}
+ */
 export class Command extends Model {
     @Field()
     public id: string;

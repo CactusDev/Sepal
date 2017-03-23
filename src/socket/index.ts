@@ -3,7 +3,7 @@ import { Server, IServerOptions } from "ws";
 import { Logger } from "../logger";
 import { PacketParser } from "../packets/packet";
 
-import { JoinPacketParser, ErrorBuilder, JoinedBuilder } from "../packets";
+import { JoinPacketParser, EventPacketParser, ErrorBuilder, JoinedBuilder } from "../packets";
 import { Rethink } from "../rethink";
 
 /**
@@ -87,7 +87,8 @@ export class SepalSocket {
         this.joinedBuilder = new JoinedBuilder();
 
         this.parsers = {
-            join: new JoinPacketParser()
+            join: new JoinPacketParser(),
+            event: new EventPacketParser()
         };
 
         rethink.on("broadcast:channel", (data: any) => {
@@ -156,6 +157,12 @@ export class SepalSocket {
                 const packetData = packet as any;
                 if (packetData.type in this.parsers) {
                     this.parsers[packetData.type].parse(packetData.data).then((parsed) => {
+                        if (parsed === null) {
+                            this.errorBuilder.create("packet data didn't contain all values.", 1005).then((error: string) => {
+                                connection.send(error);
+                                return;
+                            });
+                        }
                         if (packetData.type === "join") {
                             if (this.clients[parsed.channel] === undefined) {
                                 this.clients[parsed.channel] = [connection];
@@ -210,7 +217,6 @@ export class SepalSocket {
      * @memberOf SepalSocket
      */
     public async sendToChannel(channel: string, event: string, data: any): Promise<any> {
-        let position = 0;
         if (this.clients[channel] === undefined) {
             return;
         }
@@ -229,37 +235,37 @@ export class SepalSocket {
             delete data["permissions"];
         }
 
-        this.clients[channel].forEach((client: WebSocket) => {
-            try {
-                client.send(JSON.stringify(packet));
-            } catch (e) {
-                delete this.clients[channel][position];
-            }
-            position++;
-        });
+        const keys = Object.keys(this.clients);
+
+        for (let i = 0, length = keys.length; i < length; i++) {
+            this.clients[keys[i]].forEach((client: WebSocket) => {
+                try {
+                    client.send(JSON.stringify(packet));
+                } catch (e) {
+                    delete this.clients[keys[i]];
+                }
+            });
+        }
     }
 
     /**
      * Broadcast to all connected clients
      * 
      * @private
-     * @param {*} packet 
+     * @param {*} packet The packet to broadcast
      * 
      * @memberOf SepalSocket
      */
     private async broadcast(packet: any) {
-        let position = 0;
-
         const keys = Object.keys(this.clients);
-        keys.forEach((channel: string) => {
-            this.clients[channel].forEach((client: WebSocket) => {
+        for (let i = 0, length = keys.length; i < length; i++) {
+            this.clients[keys[i]].forEach((client: WebSocket) => {
                 try {
                     client.send(JSON.stringify(packet));
                 } catch (e) {
-                    delete this.clients[channel][position];
+                    delete this.clients[keys[i]];
                 }
-                position++;
             });
-        });
+        }
     }
 }

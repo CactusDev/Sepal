@@ -6,3 +6,4 @@ export * from "./quote";
 export * from "./repeat";
 export * from "./social";
 export * from "./trust";
+export * from "./event";
