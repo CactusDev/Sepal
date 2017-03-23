@@ -227,18 +227,15 @@ export class SepalSocket {
      * @memberOf SepalSocket
      */
     private async broadcast(packet: any) {
-        let position = 0;
-
         const keys = Object.keys(this.clients);
-        keys.forEach((channel: string) => {
-            this.clients[channel].forEach((client: WebSocket) => {
+        for (let i = 0, length = keys.length; i < length; i++) {
+            this.clients[keys[i]].forEach((client: WebSocket) => {
                 try {
                     client.send(JSON.stringify(packet));
                 } catch (e) {
-                    delete this.clients[channel][position];
+                    delete this.clients[keys[i]];
                 }
-                position++;
             });
-        });
+        }
     }
 }
