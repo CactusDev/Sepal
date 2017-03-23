@@ -1,5 +1,5 @@
 
-import { Field, Model, Validators } from "rethinkts";
+import { Field, Model } from "rethinkts";
 
 export class Config extends Model {
     @Field()
@@ -16,4 +16,7 @@ export class Config extends Model {
 
     @Field()
     public spam: Object;
+
+    @Field()
+    public whitelist: Object;
 }
