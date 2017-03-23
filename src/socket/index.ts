@@ -187,7 +187,6 @@ export class SepalSocket {
      * @memberOf SepalSocket
      */
     public async sendToChannel(channel: string, event: string, data: any): Promise<any> {
-        let position = 0;
         if (this.clients[channel] === undefined) {
             return;
         }
@@ -206,14 +205,17 @@ export class SepalSocket {
             delete data["permissions"];
         }
 
-        this.clients[channel].forEach((client: WebSocket) => {
-            try {
-                client.send(JSON.stringify(packet));
-            } catch (e) {
-                delete this.clients[channel][position];
-            }
-            position++;
-        });
+        const keys = Object.keys(this.clients);
+
+        for (let i = 0, length = keys.length; i < length; i++) {
+            this.clients[keys[i]].forEach((client: WebSocket) => {
+                try {
+                    client.send(JSON.stringify(packet));
+                } catch (e) {
+                    delete this.clients[keys[i]];
+                }
+            });
+        }
     }
 
     /**
