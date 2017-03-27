@@ -136,7 +136,7 @@ export class Rethink extends EventEmitter {
      * 
      * @memberOf Rethink
      */
-    public async getCommand(id: string, channel: string): Promise<Command> {
+    public async getCommand(id: string): Promise<Command> {
         return await Command.get<Command>(id);
     }
 

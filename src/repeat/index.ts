@@ -78,7 +78,11 @@ export class RepeatHandler {
      */
     private async startRepeat(repeat: IRepeat) {
         repeat.period = repeat.period * 1000;
-        const command = await this.rethink.getCommand(repeat.command, repeat.channel);
+        const command = await this.rethink.getCommand(repeat.command);
+
+        if (command === null) {
+            return;
+        }
 
         const interval: NodeJS.Timer = setInterval(() => {
             this.socket.sendToChannel(repeat.channel, "repeat", command.response);

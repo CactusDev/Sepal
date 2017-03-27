@@ -163,6 +163,7 @@ export class SepalSocket {
                                 return;
                             });
                         }
+
                         if (packetData.type === "join") {
                             if (this.clients[parsed.channel] === undefined) {
                                 this.clients[parsed.channel] = [connection];
@@ -182,10 +183,11 @@ export class SepalSocket {
                             this.eventCache.cacheEvent(event, cacheTime, {
                                 channel: channel,
                                 user: user
-                            }).then(() => {
+                            }).then((cached: boolean) => {
                                 connection.send(JSON.stringify({
                                     type: "cached",
                                     data: {
+                                        cached: cached,
                                         event: event,
                                         user: user,
                                         channel: channel,

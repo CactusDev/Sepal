@@ -41,11 +41,13 @@ export class EventCache {
      * 
      * @memberOf EventCache
      */
-    public async cacheEvent(event: string, cacheTime: number, data: CachedEvent) {
+    public async cacheEvent(event: string, cacheTime: number, data: CachedEvent): Promise<boolean> {
         if (this.shouldCache(event, data.channel, data.user)) {
             await this.rethink.setEvent(data.channel, data.user, event, new Date().toString());
             await this.redis.set(`${data.channel}:${event}:${data.user}`, "true", cacheTime);
+            return true;
         }
+        return false;
     }
 
     /**
