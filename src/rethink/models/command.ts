@@ -25,4 +25,7 @@ export class Command extends Model {
 
     @Field()
     public count: number;
+
+    @Field()
+    public role: number;
 }

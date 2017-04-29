@@ -1,83 +1,44 @@
-import Config from "./configs/config";
+
+import "reflect-metadata";
 
 import { Rethink } from "./rethink";
 import { SepalSocket } from "./socket";
 import { RepeatHandler } from "./repeat";
 import { Logger } from "./logger";
-import { Redis } from "./redis";
 
-/**
- * Init sentry
- * 
- */
+import config from "./configs/config";
+
 async function initLogger() {
-    await Logger.createSentry(Config.sentry);
+    await Logger.createSentry(config.sentry);
 }
 
-/**
- * Connect to rethink
- * 
- * @returns Rethink instance
- */
 async function createRethink() {
-    const rethink: Rethink = new Rethink(Config);
+    const rethink: Rethink = new Rethink(config);
     await rethink.connect();
     return rethink;
 }
 
-
-/**
- * Connect to redis.
- * 
- * @returns Redis instance
- */
-async function createRedis() {
-    const redis: Redis = new Redis(Config);
-    await redis.connect();
-    return redis;
-}
-
-
-/**
- * Start repeats
- * 
- * @param {SepalSocket} socket SepalSocket instance
- * @param {Rethink} rethink RethinkDB instance
- */
-async function startRepeat(socket: SepalSocket, rethink: Rethink) {
+async function startRepeats(rethink: Rethink, socket: SepalSocket) {
     const repeat: RepeatHandler = new RepeatHandler(socket, rethink);
     await repeat.startRepeats();
 }
 
-/**
- * Create Sepal's websocket and listen
- * 
- * @param {Rethink} rethink RethinkDB instance
- * @returns SepalSocket instance
- */
-async function createSocket(rethink: Rethink, redis: Redis) {
-    const socket: SepalSocket = new SepalSocket(Config, rethink);
+async function createSocket(rethink: Rethink) {
+    const socket: SepalSocket = new SepalSocket(config, rethink);
     await socket.create();
-
     return socket;
 }
 
-
-/**
- * Init everything
- * 
- */
 async function init() {
     try {
         await initLogger();
 
-        const rethink: Rethink = await createRethink();
-        const redis: Redis = await createRedis();
-        const socket: SepalSocket = await createSocket(rethink, redis);
+        const rethink = await createRethink();
+        const socket: SepalSocket = await createSocket(rethink);
 
-        await startRepeat(socket, rethink);
+        await startRepeats(rethink, socket);
     } catch (e) {
-        Logger.error(String(e));
+        console.error(e);
     }
 }
 
