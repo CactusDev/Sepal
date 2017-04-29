@@ -63,12 +63,12 @@ export class RepeatHandler {
                 channel: repeat.channel,
                 command: repeat.command,
                 interval: repeat.interval,
-                response: response
+                response: (response as any).resopnse
             };
 
             const data = {
                 response: {
-                    message: (createdRepeat.response as any).response
+                    message: (createdRepeat.response as any).message
                 }
             };
 
