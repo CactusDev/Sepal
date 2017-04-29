@@ -1,5 +1,5 @@
 import { Server, IServerOptions } from "ws";
-import Logger from "../logger";
+import { Logger } from "../logger";
 import { PacketParser } from "../packets/packet";
 
 import { JoinPacketParser, ErrorBuilder, JoinedBuilder } from "../packets";

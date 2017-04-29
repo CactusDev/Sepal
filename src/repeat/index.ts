@@ -90,22 +90,20 @@ export class RepeatHandler {
     }
 
     private async stop(channel: string, command: string) {
-        Object.keys(this.tracker).forEach((channel: string) => {
-            if (this.tracker[channel] === undefined) {
-                throw new Error("Attempted to remove a repeat from a channel that doesn't exist!");
-            }
+        if (this.tracker[channel] === undefined) {
+            throw new Error("Attempted to remove a repeat from a channel that doesn't exist!");
+        }
 
-            for (let i = 0; i < this.tracker[channel].length; i++) {
-                let repeat: Repeat = this.tracker[channel][i];
-                if (repeat !== undefined) {
-                    if (repeat.command === command) {
-                        // We know it's the right repeat
-                        clearInterval(this.tracker[channel][i].timer);
-                        delete this.tracker[channel][i];
-                    }
+        for (let i = 0; i < this.tracker[channel].length; i++) {
+            let repeat: Repeat = this.tracker[channel][i];
+            if (repeat !== undefined) {
+                if (repeat.command === command) {
+                    // We know it's the right repeat
+                    clearInterval(this.tracker[channel][i].timer);
+                    delete this.tracker[channel][i];
                 }
             }
-        });
+        }
     }
 
     public async startRepeats() {
