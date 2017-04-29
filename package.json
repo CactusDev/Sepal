@@ -4,8 +4,10 @@
   "description": "Event service for CactusBot",
   "main": "gulpfile.js",
   "scripts": {
-    "run": "node dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "tsc && node js",
+    "run": "node js",
+    "build": "tsc",
+    "test": "mocha tests/"
   },
   "repository": {
     "type": "git",

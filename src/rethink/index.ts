@@ -60,16 +60,13 @@ export class Rethink extends EventEmitter {
                                     const data: any = cursor["new_val"];
                                     this.emit("repeat:start", {
                                         command: data.commandName,
-                                        period: data.period,
-                                        channel: data.token
+                                        interval: data.period,
+                                        channel: data.token,
+                                        response: ""
                                     });
                                 } else {
                                     const data: any = cursor["old_val"] || cursor["new_val"];
-                                    this.emit("repeat:stop", {
-                                        command: data.commandName,
-                                        period: data.period,
-                                        channel: data.token
-                                    });
+                                    this.emit("repeat:stop", data.token, data.commandName);
                                 }
                             } else {
                                 this.emit("broadcast:channel", {
@@ -90,7 +87,7 @@ export class Rethink extends EventEmitter {
     /**
      * Get all repeats in the database
      * 
-     * @returns {Promise<any>} 
+     * @returns {Promise<any>} all the repeats
      * 
      * @memberOf Rethink
      */
@@ -103,13 +100,13 @@ export class Rethink extends EventEmitter {
     /**
      * Get the response of a command from the name given
      * 
-     * @param {string} commandName 
-     * @returns {Promise<any>} 
+     * @param {string} commandName the name of the command
+     * @returns {Promise<any>} the command model if present
      * 
      * @memberOf Rethink
      */
-    public async getCommand(name: string, channel: string): Promise<Command> {
-        return await Command.findOne<Command>({ name, channel });
+    public async getCommand(name: string, channel: string): Promise<Command[]> {
+        return await Command.find<Command>({ name: name, token: channel });
     }
 
     /**

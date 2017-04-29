@@ -1,23 +1,24 @@
-export = {
-  env: "develop",
-  rethinkdb: {
-    host: "localhost",
-    port: 28015,
-    user: "",
-    password: "",
-    db: "api",
-    silent: true // Setting this makes Thinky not log "debug" data.
-  },
-  redis: {
-    host: "localhost",
-    port: 6379,
-    password: "",
-    db: 0
-  },
-  sentry: {
-    dsn: ""
-  },
-  socket: {
-    port: 3000
-  }
+
+export default {
+    socket: {
+        port: 3000
+    },
+    rethink: {
+        connection: {
+            host: "localhost",
+            user: "yay",
+            password: ""
+        },
+        db: "api"
+    },
+    redis: {
+        host: "",
+        port: 2023,
+        password: "",
+        db: 6
+    },
+    sentry: {
+        dsn: "https://amazing.neato.stuff/keys",
+        enabled: false
+    }
 };
