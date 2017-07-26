@@ -63,7 +63,7 @@ export class RepeatHandler {
                 channel: repeat.channel,
                 command: repeat.command,
                 interval: repeat.interval,
-                response: (response as any).resopnse
+                response: (response as any).response
             };
 
             const data = {
@@ -75,13 +75,13 @@ export class RepeatHandler {
             const timer = setInterval(() => this.socket.sendToChannel(
                     repeat.channel, "repeat", data), repeat.interval * 1000);
 
-            if (this.tracker[repeat.channel] === undefined) {
+            if (!this.tracker[repeat.channel]) {
                 this.tracker[repeat.channel] = [];
             }
 
             repeat.timer = timer;
 
-            if (repeat.timer === undefined) {
+            if (!repeat.timer) {
                 throw new Error("Attempted to create a repeat without a timer!");
             }
 
