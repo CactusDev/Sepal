@@ -11,9 +11,9 @@ import { SepalSocket } from "../socket";
 interface Repeat {
     channel: string;
     interval: number;
+    remaining: number;
     command: string;
     response: string;
-    timer?: NodeJS.Timer;
 }
 
 /**
@@ -63,26 +63,18 @@ export class RepeatHandler {
                 channel: repeat.channel,
                 command: repeat.command,
                 interval: repeat.interval,
-                response: (response as any).resopnse
+                remaining: repeat.interval,
+                response: <any>response.response
             };
 
             const data = {
                 response: {
-                    message: (createdRepeat.response as any).message
+                    message: (<any>createdRepeat.response).message
                 }
             };
 
-            const timer = setInterval(() => this.socket.sendToChannel(
-                    repeat.channel, "repeat", data), repeat.interval * 1000);
-
-            if (this.tracker[repeat.channel] === undefined) {
+            if (!this.tracker[repeat.channel]) {
                 this.tracker[repeat.channel] = [];
-            }
-
-            repeat.timer = timer;
-
-            if (repeat.timer === undefined) {
-                throw new Error("Attempted to create a repeat without a timer!");
             }
 
             this.tracker[repeat.channel].push(repeat);
@@ -99,8 +91,7 @@ export class RepeatHandler {
             if (repeat !== undefined) {
                 if (repeat.command === command) {
                     // We know it's the right repeat
-                    clearInterval(this.tracker[channel][i].timer);
-                    delete this.tracker[channel][i];
+                    this.tracker[channel].splice(i, 1);
                 }
             }
         }
@@ -116,10 +107,30 @@ export class RepeatHandler {
                     channel: databaseRepeat.token,
                     command: databaseRepeat.commandName,
                     interval: databaseRepeat.period,
+                    remaining: databaseRepeat.period,
                     response: response
                 };
                 this.start(repeat);
             });
         });
+
+        setInterval(async () => {
+            for (let channel of Object.keys(this.tracker)) {
+                for (let repeat of this.tracker[channel]) {
+                    repeat.remaining -= 1;
+                    if (repeat.remaining === 0) {
+                        repeat.remaining = repeat.interval;
+
+                        const data = {
+                            response: {
+                                message: (<any>repeat.response).message
+                            }
+                        }
+
+                        this.socket.sendToChannel(repeat.channel, "repeat", data);
+                    }
+                }
+            }
+        }, 1000);
     }
 }
