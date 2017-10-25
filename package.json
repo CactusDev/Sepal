@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "Event service for CactusBot",
   "main": "gulpfile.js",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cactusdev/sepal.git"
@@ -20,7 +19,15 @@
   },
   "homepage": "https://github.com/cactusdev/sepal#readme",
   "dependencies": {
+    "@angular/core": "^4.4.6",
+    "@types/config": "0.0.33",
+    "@types/node": "^8.0.47",
+    "@types/ws": "^3.2.0",
+    "cactus-stl": "^1.0.7",
+    "config": "^1.27.0",
+    "js-yaml": "^3.10.0",
+    "ws": "^3.2.0",
+    "ws-error": "^1.0.2"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }
