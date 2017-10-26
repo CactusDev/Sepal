@@ -23,11 +23,13 @@
     "@types/config": "0.0.33",
     "@types/node": "^8.0.47",
     "@types/ws": "^3.2.0",
-    "cactus-stl": "^1.0.7",
+    "cactus-stl": "^1.0.8",
     "config": "^1.27.0",
     "js-yaml": "^3.10.0",
+    "reflect-metadata": "^0.1.10",
+    "rxjs": "^5.5.2",
     "ws": "^3.2.0",
-    "ws-error": "^1.0.2"
+    "ws-error": "^1.0.3"
   },
   "devDependencies": {}
 }

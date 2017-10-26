@@ -14,8 +14,8 @@ export class Core {
 	public async start() {
 		Logger.log("core", "Starting...");
 
-		process.on("SIGTERM", this.stop);
-		process.on("SIGINT", this.stop);
+		process.on("SIGTERM", () => this.stop());
+		process.on("SIGINT", () => this.stop());
 
 		await this.socket.listen();
 	}
@@ -23,7 +23,11 @@ export class Core {
 	private async stop() {
 		Logger.log("core", "Shutting down...");
 
-		await this.socket.end();
+		try {
+			await this.socket.end();			
+		} catch (e) {
+			console.log(e);
+		}
 
 		process.exit(0);
 	}
