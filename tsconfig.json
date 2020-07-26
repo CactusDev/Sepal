@@ -1,26 +1,16 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "es6",
-    "noImplicitAny": true,
-    "removeComments": true,
-    "preserveConstEnums": true,
-    "sourceMap": true,
-    "outDir": "dist",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "typeRoots": [
-      "node_modules/@types"
-    ],"types": [
-      "node"
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "outDir": "dist",
+        "strict": true,
+        "sourceMap": true,
+        "typeRoots": [
+            "node_modules/@types"
+        ]
+    },
+    "exclude": [
+        "dist",
+        "node_modules"
     ]
-  },
-  "include": [
-    "./src/**/*"
-  ],
-  "exclude": [
-    "js",
-    "node_modules"
-  ]
 }
