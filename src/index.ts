@@ -1,5 +1,7 @@
 
-import { Injector } from "dependy";
+import { Injector } from "dependy"
+
+import { Core } from "./core"
 
 const injector = new Injector(
 	{
