@@ -1,5 +1,6 @@
 
 import { EventEmitter } from "events";
+import { Config } from "./config"
 
 import * as Amqp from "amqp-ts";
 
@@ -8,15 +9,15 @@ export class RabbitHandler extends EventEmitter {
     private proxyExchange: Amqp.Exchange;
     private outgoingQueue: Amqp.Queue;
 
-    constructor(private host: string, private port: number, private messageQueueName: string) {
+    constructor(private config: Config) {
         super();
     }
 
     public async connect() {
-        this.connection = new Amqp.Connection(`amqp://${this.host}:${this.port}`);
+        this.connection = new Amqp.Connection(`amqp://${this.config.rabbitmq.host}:${this.config.rabbitmq.port}`);
         this.proxyExchange = this.connection.declareExchange("proxy");
         
-        this.outgoingQueue = this.connection.declareQueue(`${this.messageQueueName}-repeat`);
+        this.outgoingQueue = this.connection.declareQueue(`${this.config.rabbitmq.queues.messages}-repeat`);
         this.outgoingQueue.bind(this.proxyExchange);
 
         await this.connection.completeConfiguration();

@@ -1,0 +1,14 @@
+
+redis:
+  db: 1
+  host: 127.0.0.1
+  port: 6379
+  password: verysecure
+
+rabbitmq:
+  host: "127.0.0.1"
+  port: 32779
+  username: guest
+  password: guest
+  queues:
+    messages: messages

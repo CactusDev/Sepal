@@ -19,12 +19,12 @@ export class RepeatManager {
         const difference = allRepeats.filter(repeat => !currentIds.includes(repeat.id))
     
         // Start all missing repeats.
-        difference.forEach(async repeat => await this.redis.set(`repeat:${repeat.channel}:${repeat.id}`, "", repeat.meta.delay * 1000))
+        difference.forEach(async repeat => await this.redis.set(`repeat:${repeat.channel}:${repeat.id}`, "", repeat.meta.delay))
     }
 
     public startExpirationListener() {
-        this.redis.on("expiration", async (chan, msg) => {
-            const { key, channel, id } = msg.split(":")
+        this.redis.on("expiration", async (event) => {
+            const { key, channel, id } = event.msg.split(":")
             
             const repeat = await this.getRepeatData(channel, id)
             if (!repeat) {
@@ -33,16 +33,21 @@ export class RepeatManager {
             }
 
             // Add the key back into Redis.
-            await this.redis.set(msg, "", repeat.meta.delay * 1000)
+            await this.redis.set(event.msg, "", repeat.meta.delay)
 
             // Once it has been scheduled, send the packet into Rabbit.
-            await this.rabbit.queueResponse([
-                {
-                    packet: repeat.message,
-                    channel: repeat.channel,
-                    service: ""  // TODO: Service-specific repeats
-                }
-            ])
+            // await this.rabbit.queueResponse([
+            //     {
+            //         packet: repeat.message,
+            //         channel: repeat.channel,
+            //         service: ""  // TODO: Service-specific repeats
+            //     }
+            // ])
+            console.log({
+                packet: repeat.message,
+                channel: repeat.channel,
+                service: ""  // TODO: Service-specific repeats
+            })
         })
     }
 
@@ -68,6 +73,6 @@ export class RepeatManager {
     }
 
     private async getAllRepeats(): Promise<Repeat[]> {
-        return []
+        return [await this.getRepeatData("", 0)]
     }
 }
