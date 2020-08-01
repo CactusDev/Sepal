@@ -55,7 +55,8 @@ interface RepeatMeta {
 }
 
 interface Repeat {
-    channel: string,
+    id: number
+    channel: string
     message: CactusMessagePacket
     meta: RepeatMeta
 }

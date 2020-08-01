@@ -27,7 +27,7 @@
     "@types/bluebird": "^3.5.32",
     "amqp-ts": "1.4.0",
     "bluebird": "^3.7.2",
-    "cactus-stl": "^1.0.11",
+    "cactus-stl": "^1.0.12",
     "dependy": "^1.0.2",
     "events": "^3.2.0",
     "express": "^4.17.1"
