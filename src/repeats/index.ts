@@ -36,18 +36,13 @@ export class RepeatManager {
             await this.redis.set(event.msg, "", repeat.meta.delay)
 
             // Once it has been scheduled, send the packet into Rabbit.
-            // await this.rabbit.queueResponse([
-            //     {
-            //         packet: repeat.message,
-            //         channel: repeat.channel,
-            //         service: ""  // TODO: Service-specific repeats
-            //     }
-            // ])
-            console.log({
-                packet: repeat.message,
-                channel: repeat.channel,
-                service: ""  // TODO: Service-specific repeats
-            })
+            await this.rabbit.queueResponse([
+                {
+                    packet: repeat.message,
+                    channel: repeat.channel,
+                    service: ""  // TODO: Service-specific repeats
+                }
+            ])
         })
     }
 
