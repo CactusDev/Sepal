@@ -24,14 +24,15 @@
   },
   "homepage": "https://github.com/cactusdev/sepal#readme",
   "dependencies": {
-    "@types/express": "^4.17.7",
-    "@types/ws": "^7.2.6",
-    "bufferutil": "^4.0.1",
+    "@types/bluebird": "^3.5.32",
+    "amqp-ts": "1.4.0",
+    "bluebird": "^3.7.2",
+    "cactus-stl": "^1.0.11",
     "dependy": "^1.0.2",
-    "express": "^4.17.1",
-    "http": "0.0.1-security",
-    "utf-8-validate": "^5.0.2",
-    "ws": "^7.3.1"
+    "events": "^3.2.0",
+    "express": "^4.17.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/express": "^4.17.7"
+  }
 }

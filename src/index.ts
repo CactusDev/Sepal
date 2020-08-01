@@ -1,18 +1,20 @@
 
-import { Injector } from "dependy"
+// import { Injector } from "dependy"
 
-import { Core } from "./core"
+// import { Core } from "./core"
 
-const injector = new Injector(
-	{
-		injects: Core,
-		depends: []
-	}
-);
+// const injector = new Injector(
+// 	{
+// 		injects: Core,
+// 		depends: []
+// 	}
+// );
 
-async function start() {
-}
+// async function start() {
+// }
 
-start()
-	.then(() => console.log("Sepal online."))
-	.catch(console.error)
+// start()
+// 	.then(() => console.log("Sepal online."))
+// 	.catch(console.error)
+
+

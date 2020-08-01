@@ -16,7 +16,7 @@ export class RabbitHandler extends EventEmitter {
         this.connection = new Amqp.Connection(`amqp://${this.host}:${this.port}`);
         this.proxyExchange = this.connection.declareExchange("proxy");
         
-        this.outgoingQueue = this.connection.declareQueue(`${this.messageQueueName}-proxy`);
+        this.outgoingQueue = this.connection.declareQueue(`${this.messageQueueName}-repeat`);
         this.outgoingQueue.bind(this.proxyExchange);
 
         await this.connection.completeConfiguration();
@@ -26,11 +26,7 @@ export class RabbitHandler extends EventEmitter {
         await this.connection.close();
     }
 
-    public async queueResponse(message: ProxyResponse[]) {
-        for (let i = 0; i < message.length; i++) {
-            message[i].order = i;
-        }
-
+    public async queueResponse(message: CactusContext[]) {
         const stringed = JSON.stringify(message);
         await this.outgoingQueue.send(new Amqp.Message(stringed));
     }

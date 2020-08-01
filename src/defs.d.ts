@@ -50,6 +50,16 @@ interface CactusContext {
     service: Service
 }
 
+interface RepeatMeta {
+    delay: number
+}
+
+interface Repeat {
+    channel: string,
+    message: CactusMessagePacket
+    meta: RepeatMeta
+}
+
 interface ProxyMessage {
     type: "message"
 
@@ -63,4 +73,16 @@ interface ProxyMessage {
     parts: string[]
     service: string
     source: string
+}
+
+interface ProxyResponse {
+    channel: string;
+    message: string;
+    service: string;
+    order: number;
+
+    meta: {
+        action: boolean;
+        target?: string;
+    }
 }

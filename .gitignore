@@ -6,5 +6,5 @@ release/
 typings/
 lib/
 
-src/configs/config.ts
 dist/
+config/local.yml
