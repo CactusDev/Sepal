@@ -29,9 +29,9 @@ const injector = new Injector(
     },
     {
 		injects: Core,
-		depends: [RedisController, RepeatManager]
+		depends: [RedisController, RabbitHandler, RepeatManager]
 	}
-);
+)
 
 async function start() {
     const core = injector.get(Core)

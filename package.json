@@ -24,9 +24,11 @@
   },
   "homepage": "https://github.com/cactusdev/sepal#readme",
   "dependencies": {
+    "@types/axios": "^0.14.0",
     "@types/bluebird": "^3.5.32",
     "@types/config": "^0.0.36",
     "amqp-ts": "1.4.0",
+    "axios": "^0.19.2",
     "bluebird": "^3.7.2",
     "cactus-stl": "^1.0.12",
     "config": "^3.3.1",

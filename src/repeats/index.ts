@@ -35,6 +35,7 @@ export class RepeatManager {
             // Add the key back into Redis.
             await this.redis.set(event.msg, "", repeat.meta.delay)
 
+            console.log(`Submitting repeat for ${repeat.channel}`)
             // Once it has been scheduled, send the packet into Rabbit.
             await this.rabbit.queueResponse([
                 {
@@ -62,7 +63,7 @@ export class RepeatManager {
                 action: false
             },
             meta: {
-                delay: 5
+                delay: 10
             }
         }
     }
