@@ -37,13 +37,11 @@ export class RepeatManager {
 
             console.log(`Submitting repeat for ${repeat.channel}`)
             // Once it has been scheduled, send the packet into Rabbit.
-            await this.rabbit.queueResponse([
-                {
-                    packet: repeat.message,
-                    channel: repeat.channel,
-                    service: ""  // TODO: Service-specific repeats
-                }
-            ])
+            await this.rabbit.queueResponse({
+                packet: repeat.message,
+                channel: repeat.channel,
+                service: "twitch"  // TODO: Service-specific repeats
+            })
         })
     }
 

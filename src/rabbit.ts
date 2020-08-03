@@ -27,7 +27,7 @@ export class RabbitHandler extends EventEmitter {
         await this.connection.close();
     }
 
-    public async queueResponse(message: CactusContext[]) {
+    public async queueResponse(message: CactusContext) {
         const stringed = JSON.stringify(message);
         await this.outgoingQueue.send(new Amqp.Message(stringed));
     }
